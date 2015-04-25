@@ -53,6 +53,32 @@ class Translation(Body):
         return q[0,:], q[1,:]
 
 
+class Pitching(Body):
+    """Sinusoidal pitching for an existing body
+    """
+    def __init__(self, body, amplitude, frequency, phase=0.):
+        self._amplitude = amplitude
+        self._frequency = frequency
+        self._phase = phase * np.pi / 180
+        self._time = 0.
+        self._body = Translation(body)
+
+    def angle(self):
+        return self._amplitude * np.sin(self._frequency * self._time
+                                        + self._phase)
+
+    @property
+    def time(self):
+        return _time
+
+    @time.setter
+    def time(self, value):
+        self._time = value
+
+    def get_points(self):
+        self._body.angle = self.angle()
+        return self._body.get_points()
+
 class VortexPanels(object):
     pass
 
