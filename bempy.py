@@ -3,7 +3,15 @@ import numpy as np
 
 class Body(object):
     def __init__(self):
-        pass
+        self._time = 0
+
+    @property
+    def time(self):
+        return _time
+
+    @time.setter
+    def time(self, value):
+        self._time = value
 
 class Airfoil(Body):
     """NACA 4-digit series airfoil
@@ -21,7 +29,7 @@ class Translation(Body):
     """Translation/rotation of an existing body
     """
     def __init__(self, body, angle=0., displacement=None):
-        self.body = body
+        self._parent = body
         self.angle = angle
         self.displacement = displacement
 
@@ -44,7 +52,7 @@ class Translation(Body):
         self._displacement = np.array(value)
 
     def get_points(self):
-        x, y = self.body.get_points()
+        x, y = self._parent.get_points()
         q = np.vstack([x, y])
         if self._angle:
             q = np.dot(self._R, q)
@@ -61,6 +69,7 @@ class Pitching(Body):
         self._frequency = frequency
         self._phase = phase * np.pi / 180
         self._time = 0.
+        self._parent = body
         self._body = Translation(body)
 
     def angle(self):
@@ -74,10 +83,41 @@ class Pitching(Body):
     @time.setter
     def time(self, value):
         self._time = value
+        self._parent.time = value
 
     def get_points(self):
         self._body.angle = self.angle()
         return self._body.get_points()
+
+
+class Heaving(Body):
+    """Sinusoidal heaving for an existing body
+    """
+    def __init__(self, body, displacement, frequency, phase=0.):
+        self._displacement = np.array(displacement)
+        self._frequency = frequency
+        self._phase = phase * np.pi / 180
+        self._time = 0.
+        self._parent = body
+        self._body = Translation(body)
+
+    def displacement(self):
+        return self._displacement * np.sin(self._frequency * self._time
+                                           + self._phase)
+
+    @property
+    def time(self):
+        return _time
+
+    @time.setter
+    def time(self, value):
+        self._time = value
+        self._parent.time = value
+
+    def get_points(self):
+        self._body.displacement = self.displacement()
+        return self._body.get_points()
+
 
 class VortexPanels(object):
     pass
