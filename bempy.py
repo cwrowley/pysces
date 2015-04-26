@@ -13,6 +13,20 @@ class Body(object):
     def time(self, value):
         self._time = value
 
+class Circle(Body):
+    """Circle
+    """
+    def __init__(self, radius, num_points):
+        """Return a circle with specified radius and number of points
+        """
+        self._radius = radius
+        th = np.linspace(0, 2 * np.pi, num_points)
+        self._x = radius * np.cos(th)
+        self._y = radius * np.sin(th)
+
+    def get_points(self):
+        return self._x, self._y
+
 
 class Airfoil(Body):
     """NACA 4-digit series airfoil
