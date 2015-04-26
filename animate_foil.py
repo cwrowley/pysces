@@ -7,6 +7,7 @@ airfoil = Translation(airfoil, displacement=(-0.25, 0))
 airfoil = Translation(airfoil, angle=0)
 airfoil = Pitching(airfoil, 10, 2*np.pi, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), 2*np.pi, phase=0)
+airfoil = Translation(airfoil, displacement=(3,4))
 
 fig, ax = plt.subplots(1)
 ax.axis('equal')

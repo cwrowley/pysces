@@ -7,11 +7,12 @@ class Body(object):
 
     @property
     def time(self):
-        return _time
+        return self._time
 
     @time.setter
     def time(self, value):
         self._time = value
+
 
 class Airfoil(Body):
     """NACA 4-digit series airfoil
@@ -25,11 +26,32 @@ class Airfoil(Body):
         return self._x, self._y
 
 
-class Translation(Body):
+class BodyTransformation(Body):
+    """Base class for transformations of existing bodies
+    """
+    def __init__(self, body):
+        super(BodyTransformation, self).__init__()
+        self._parent = body
+
+    @property
+    def time(self):
+        Body.time.fget(self)
+
+    @time.setter
+    def time(self, value):
+        Body.time.fset(self, value)
+        # pass time to parent as well
+        self._parent.time = value
+
+    def get_points_from_parent(self):
+        return self._parent.get_points()
+
+
+class Translation(BodyTransformation):
     """Translation/rotation of an existing body
     """
     def __init__(self, body, angle=0., displacement=None):
-        self._parent = body
+        super(Translation, self).__init__(body)
         self.angle = angle
         self.displacement = displacement
 
@@ -52,7 +74,7 @@ class Translation(Body):
         self._displacement = np.array(value)
 
     def get_points(self):
-        x, y = self._parent.get_points()
+        x, y = self.get_points_from_parent()
         q = np.vstack([x, y])
         if self._angle:
             q = np.dot(self._R, q)
@@ -61,61 +83,37 @@ class Translation(Body):
         return q[0,:], q[1,:]
 
 
-class Pitching(Body):
+class Pitching(BodyTransformation):
     """Sinusoidal pitching for an existing body
     """
     def __init__(self, body, amplitude, frequency, phase=0.):
+        super(Pitching, self).__init__(body)
         self._amplitude = amplitude
         self._frequency = frequency
         self._phase = phase * np.pi / 180
-        self._time = 0.
-        self._parent = body
         self._body = Translation(body)
 
-    def angle(self):
-        return self._amplitude * np.sin(self._frequency * self._time
-                                        + self._phase)
-
-    @property
-    def time(self):
-        return _time
-
-    @time.setter
-    def time(self, value):
-        self._time = value
-        self._parent.time = value
-
     def get_points(self):
-        self._body.angle = self.angle()
+        angle = self._amplitude * np.sin(self._frequency * self._time
+                                         + self._phase)
+        self._body.angle = angle
         return self._body.get_points()
 
 
-class Heaving(Body):
+class Heaving(BodyTransformation):
     """Sinusoidal heaving for an existing body
     """
     def __init__(self, body, displacement, frequency, phase=0.):
+        super(Heaving, self).__init__(body)
         self._displacement = np.array(displacement)
         self._frequency = frequency
         self._phase = phase * np.pi / 180
-        self._time = 0.
-        self._parent = body
         self._body = Translation(body)
 
-    def displacement(self):
-        return self._displacement * np.sin(self._frequency * self._time
-                                           + self._phase)
-
-    @property
-    def time(self):
-        return _time
-
-    @time.setter
-    def time(self, value):
-        self._time = value
-        self._parent.time = value
-
     def get_points(self):
-        self._body.displacement = self.displacement()
+        displacement = self._displacement * np.sin(self._frequency * self._time
+                                                   + self._phase)
+        self._body.displacement = displacement
         return self._body.get_points()
 
 
