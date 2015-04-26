@@ -1,9 +1,9 @@
 from bempy import *
 import matplotlib.pyplot as plt
 
-airfoil = Airfoil("2412", 20)      # NACA 2412 airfoil with 20 points per side
-airfoil = Translation(airfoil, displacement=(-0.25, 0))
-airfoil = Translation(airfoil, angle=10) # rotate by 10 degrees about 1/4 chord
+airfoil = Airfoil("2412", 20)   # NACA 2412 airfoil with 20 points per side
+airfoil = Translation(airfoil, (-0.25, 0))
+airfoil = Rotation(airfoil, 10) # rotate by 10 degrees about 1/4 chord
 
 body_panels = BoundVortexPanels(airfoil)
 wake_panels = FreeVortexPanels()

@@ -62,22 +62,11 @@ class BodyTransformation(Body):
 
 
 class Translation(BodyTransformation):
-    """Translation/rotation of an existing body
+    """Translation of an existing body
     """
-    def __init__(self, body, angle=0., displacement=None):
+    def __init__(self, body, displacement=(0,0)):
         super(Translation, self).__init__(body)
-        self.angle = angle
         self.displacement = displacement
-
-    @property
-    def angle(self):
-        return self._angle
-
-    @angle.setter
-    def angle(self, value):
-        self._angle = value
-        th = value * np.pi / 180
-        self._R = np.array([[np.cos(th), np.sin(th)],[-np.sin(th), np.cos(th)]])
 
     @property
     def displacement(self):
@@ -90,10 +79,33 @@ class Translation(BodyTransformation):
     def get_points(self):
         x, y = self.get_points_from_parent()
         q = np.vstack([x, y])
-        if self._angle:
-            q = np.dot(self._R, q)
         if self.displacement.any():
             q += self.displacement[:, np.newaxis]
+        return q[0,:], q[1,:]
+
+
+class Rotation(BodyTransformation):
+    """Rotation of an existing body
+    """
+    def __init__(self, body, angle=0.):
+        super(Rotation, self).__init__(body)
+        self.angle = angle
+
+    @property
+    def angle(self):
+        return self._angle
+
+    @angle.setter
+    def angle(self, value):
+        self._angle = value
+        th = value * np.pi / 180
+        self._R = np.array([[np.cos(th), np.sin(th)],[-np.sin(th), np.cos(th)]])
+
+    def get_points(self):
+        x, y = self.get_points_from_parent()
+        q = np.vstack([x, y])
+        if self._angle:
+            q = np.dot(self._R, q)
         return q[0,:], q[1,:]
 
 
@@ -105,7 +117,7 @@ class Pitching(BodyTransformation):
         self._amplitude = amplitude
         self._frequency = frequency
         self._phase = phase * np.pi / 180
-        self._body = Translation(body)
+        self._body = Rotation(body)
 
     def get_points(self):
         angle = self._amplitude * np.sin(self._frequency * self._time
