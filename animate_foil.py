@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 airfoil = Airfoil("0012", 20)      # NACA 0012 airfoil with 20 points per side
-airfoil = Translation(airfoil, (-0.25, 0))
+airfoil = TransformedBody(airfoil, displacement=(-0.25, 0))
 airfoil = Pitching(airfoil, 10, 2*np.pi, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), 2*np.pi, phase=0)
-airfoil = Translation(airfoil, (3,4))
+airfoil = TransformedBody(airfoil, displacement=(3,4))
 
 fig, ax = plt.subplots(1)
 ax.axis('equal')
