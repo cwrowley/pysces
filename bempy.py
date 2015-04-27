@@ -94,7 +94,7 @@ class Circle(Body):
         self._x = radius * np.cos(th)
         self._y = radius * np.sin(th)
 
-    def get_points(self):
+    def get_points(self, **kwargs):
         return self._x, self._y
 
 
@@ -135,10 +135,10 @@ class Airfoil(Body):
             y_camber[back] = max_camber * ((1. - x[back])/(1. - p)**2 *
                                            (1 + x[back] - 2 * p))
         self._x = np.hstack([x[-1:0:-1], x])
-        self._y = np.hstack([y_camber[-1:0:-1] - y_thick[-1:0:-1],
-                             y_camber + y_thick])
+        self._y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
+                             y_camber - y_thick])
 
-    def get_points(self):
+    def get_points(self, **kwargs):
         return self._x, self._y
 
 
@@ -180,11 +180,10 @@ class TransformedBody(object):
     def time(self, value):
         self._body.time = value
 
-    def get_points_body_frame(self):
-        return self._body.get_points()
-
-    def get_points(self):
-        x, y = self.get_points_body_frame()
+    def get_points(self, body_frame=False):
+        x, y = self._body.get_points()
+        if body_frame:
+            return x, y
         q = self.get_transformation().xform_position(np.vstack([x, y]))
         return q[0,:], q[1,:]
 
@@ -226,7 +225,22 @@ class VortexPanels(object):
 class BoundVortexPanels(object):
     def __init__(self, body):
         self._body = body
-        self.panels = body.get_points()
+        x, y = body.get_points(body_frame=True)
+        q = np.vstack([x,y])
+        dq = np.diff(q)
+        self._numpanels = dq.shape[1]
+        self._normals = (np.vstack([dq[1,:], -dq[0,:]]) /
+                         np.linalg.norm(dq, axis=0))
+        q25 = q[:,:-1] + 0.25 * dq
+        q75 = q[:,:-1] + 0.75 * dq
+        # vortex positions at 1/4 chord of panel
+        # collocation points at 3/4 chord of panel
+        # assume first half goes from trailing edge to leading edge,
+        #        second half from leading edge back to trailing edge
+        half = self._numpanels / 2
+        self._xvort = np.hstack([q75[:,:half], q25[:,half:]])
+        self._xcoll = np.hstack([q25[:,:half], q75[:,half:]])
+        self._gam = np.zeros(self._numpanels)
 
     def update_positions(self):
         self.panels = self._body.get_points()
@@ -240,11 +254,15 @@ class BoundVortexPanels(object):
 
     @property
     def vortices(self):
-        return 0, 0, 0
+        return self._xvort[0,:], self._xvort[1,:], self._gam
 
     @property
     def collocation_pts(self):
-        return 1, 0
+        return self._xcoll[0,:], self._xcoll[1,:]
+
+    @property
+    def normals(self):
+        return self._normals[0,:], self._normals[1,:]
 
 class FreeVortexParticles(object):
     def __init__(self):
