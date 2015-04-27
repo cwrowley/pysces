@@ -238,6 +238,14 @@ class BoundVortexPanels(object):
     def get_wake_panels(self):
         return None
 
+    @property
+    def vortices(self):
+        return 0, 0, 0
+
+    @property
+    def collocation_pts(self):
+        return 1, 0
+
 class FreeVortexParticles(object):
     def __init__(self):
         pass
