@@ -193,25 +193,26 @@ class Heaving(TransformedBody):
 class VortexPanels(object):
     pass
 
-class BoundVortexPanels(VortexPanels):
+class BoundVortexPanels(object):
     def __init__(self, body):
+        self._body = body
         self.panels = body.get_points()
 
-    def update_positions(self, body):
-        self.panels = body.get_points()
+    def update_positions(self):
+        self.panels = self._body.get_points()
 
-    def update_strengths(self, wake):
+    def update_strengths(self, wake, Uinfty, dt):
         # compute influence coefficients and RHS and solve for strengths
         pass
 
     def get_wake_panels(self):
         return None
 
-class FreeVortexPanels(VortexPanels):
+class FreeVortexParticles(object):
     def __init__(self):
         pass
 
-    def update(self, dt):
+    def update(self, body, Uinfty, dt):
         pass
 
     def add_panels(self, panels):
@@ -222,6 +223,22 @@ class FreeVortexPanels(VortexPanels):
         return 0, 0, 0
 
 
+class SourceDoubletPanels(object):
+    def __init__(self, body):
+        self._body = body
+        self.panels = body.get_points()
+
+    def update_positions(self):
+        self.panels = self._body.get_points()
+
+    def update_strengths(self, wake, Uinfty, dt):
+        # compute influence coefficients and RHS and solve for strengths
+        pass
+
+    def get_wake_panels(self):
+        return None
+
+
 def time_advance(body, wake, Uinfty, dt):
     # todo: how does dt come in to updating strengths of body panels, and in
     # particular wake panel to be shed?
@@ -229,8 +246,8 @@ def time_advance(body, wake, Uinfty, dt):
     # 1) define the wake panel: need Uinf and dt to determine length
     # 2) to determine rhs for update_strengths, need Uinf for relative vel
     # 3) wake update needs Uinf and dt (relative vel)
-    body.update_strengths(wake)
-    wake.update(dt)
+    body.update_strengths(wake, Uinfty, dt) # might need dt to determine length of TE panel
+    wake.update(body, Uinfty, dt)
     shed_panels = body.get_wake_panels()
     wake.add_panels(shed_panels)
 
