@@ -21,10 +21,10 @@ for i in range(num_steps):
     lift, drag = compute_forces(body_panels, wake_panels)
     print("Time %.1f: Lift = %.3f, Drag = %.3f" % (time, lift, drag))
 
-xv, yv, gv = wake_panels.vortices
-x, y = airfoil.get_points()
-plt.plot(x, y, 'k-+')
-plt.plot(xv, yv, 'ro')
+vort, gv = wake_panels.vortices
+q = airfoil.get_points()
+plt.plot(q[0], q[1], 'k-+')
+plt.plot(vort[0], vort[1], 'ro')
 plt.axis('equal')
 plt.grid(True)
 plt.show()

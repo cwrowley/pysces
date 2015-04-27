@@ -91,11 +91,10 @@ class Circle(Body):
         super(Circle, self).__init__()
         self._radius = radius
         th = np.linspace(0, 2 * np.pi, num_points)
-        self._x = radius * np.cos(th)
-        self._y = radius * np.sin(th)
+        self._points = radius * np.vstack([np.cos(th), np.sin(th)])
 
     def get_points(self, **kwargs):
-        return self._x, self._y
+        return self._points
 
 
 class Airfoil(Body):
@@ -134,12 +133,13 @@ class Airfoil(Body):
             y_camber[front] = max_camber * x[front] / p**2 * (2 * p - x[front])
             y_camber[back] = max_camber * ((1. - x[back])/(1. - p)**2 *
                                            (1 + x[back] - 2 * p))
-        self._x = np.hstack([x[-1:0:-1], x])
-        self._y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
-                             y_camber - y_thick])
+        x = np.hstack([x[-1:0:-1], x])
+        y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
+                       y_camber - y_thick])
+        self._points = np.vstack([x, y])
 
     def get_points(self, **kwargs):
-        return self._x, self._y
+        return self._points
 
 
 class TransformedBody(object):
@@ -181,11 +181,10 @@ class TransformedBody(object):
         self._body.time = value
 
     def get_points(self, body_frame=False):
-        x, y = self._body.get_points()
+        q = self._body.get_points()
         if body_frame:
-            return x, y
-        q = self.get_transformation().xform_position(np.vstack([x, y]))
-        return q[0,:], q[1,:]
+            return q
+        return self.get_transformation().xform_position(q)
 
 
 class Pitching(TransformedBody):
@@ -225,8 +224,7 @@ class VortexPanels(object):
 class BoundVortexPanels(object):
     def __init__(self, body):
         self._body = body
-        x, y = body.get_points(body_frame=True)
-        q = np.vstack([x,y])
+        q = body.get_points(body_frame=True)
         dq = np.diff(q)
         self._numpanels = dq.shape[1]
         self._normals = (np.vstack([dq[1,:], -dq[0,:]]) /
@@ -254,11 +252,11 @@ class BoundVortexPanels(object):
 
     @property
     def vortices(self):
-        return self._xvort[0,:], self._xvort[1,:], self._gam
+        return self._xvort, self._gam
 
     @property
     def collocation_pts(self):
-        return self._xcoll[0,:], self._xcoll[1,:]
+        return self._xcoll
 
     @property
     def normals(self):
@@ -276,7 +274,7 @@ class FreeVortexParticles(object):
 
     @property
     def vortices(self):
-        return 0, 0, 0
+        return np.array([0,0]), 0
 
 
 class SourceDoubletPanels(object):

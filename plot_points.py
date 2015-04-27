@@ -8,15 +8,14 @@ airfoil = TransformedBody(airfoil, angle=10)
 
 body_panels = BoundVortexPanels(airfoil)
 
-xv, yv, gv = body_panels.vortices
-xc, yc = body_panels.collocation_pts
-xn, yn = body_panels.normals
-x, y = airfoil.get_points(body_frame=True)
-plt.plot(x, y, 'k-+')
-plt.plot(xv, yv, 'ro', label="vortices")
-plt.plot(xc, yc, 'bx', label="collocation pts")
-base = np.vstack([xc,yc])
-plt.quiver(xc, yc, xn, yn)
+vort, gv = body_panels.vortices
+coll = body_panels.collocation_pts
+norm = body_panels.normals
+foil = airfoil.get_points(body_frame=True)
+plt.plot(foil[0], foil[1], 'k-+')
+plt.plot(vort[0], vort[1], 'ro', label="vortices")
+plt.plot(coll[0], coll[1], 'bx', label="collocation pts")
+plt.quiver(coll[0], coll[1], norm[0], norm[1])
 plt.legend()
 plt.axis('equal')
 plt.grid(True)

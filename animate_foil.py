@@ -11,20 +11,18 @@ airfoil = TransformedBody(airfoil, displacement=(3,4))
 fig, ax = plt.subplots(1)
 ax.axis('equal')
 ax.grid(True)
-x, y = airfoil.get_points()
-line, = ax.plot(x, y, '-k+')
+q = airfoil.get_points()
+line, = ax.plot(q[0], q[1], '-k+')
 
 def gen_points():
     num_steps = 50
     dt = 0.02
     for i in range(num_steps):
         airfoil.time = i * dt
-        x, y = airfoil.get_points()
-        yield x, y
+        yield airfoil.get_points()
 
-def redraw(data):
-    x, y = data
-    line.set_data(x, y)
+def redraw(q):
+    line.set_data(q[0], q[1])
 
 movie = animation.FuncAnimation(fig, redraw, gen_points, interval=50, repeat_delay=0)
 plt.show()
