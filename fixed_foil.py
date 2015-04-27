@@ -9,10 +9,11 @@ body_panels = BoundVortexPanels(airfoil)
 wake_panels = FreeVortexPanels()
 
 num_steps = 10
+Uinfty = (1,0)
 dt = 0.1
 for i in range(num_steps):
     time = i * dt
-    time_advance(body_panels, wake_panels, dt)
+    time_advance(body_panels, wake_panels, Uinfty, dt)
     lift, drag = compute_forces(body_panels, wake_panels)
     print("Time %.1f: Lift = %.3f, Drag = %.3f" % (time, lift, drag))
 
