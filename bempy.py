@@ -89,6 +89,7 @@ class Circle(Body):
     def __init__(self, radius, num_points):
         """Return a circle with specified radius and number of points
         """
+        super(Circle, self).__init__()
         self._radius = radius
         th = np.linspace(0, 2 * np.pi, num_points)
         self._x = radius * np.cos(th)
@@ -104,17 +105,17 @@ class Airfoil(Body):
     def __init__(self, code, num_points, **kwargs):
         """Return a NACA 4-digit series airfoil
         """
+        super(Airfoil, self).__init__()
         self._x, self._y = naca.naca4(code, num_points, **kwargs)
 
     def get_points(self):
         return self._x, self._y
 
 
-class TransformedBody(Body):
+class TransformedBody(object):
     """Base class for Euclidean transformations of existing bodies
     """
     def __init__(self, body, angle=0, displacement=(0,0)):
-        super(TransformedBody, self).__init__()
         self._parent = body
         self._body = body.get_body()
         self._transformation = EuclideanTransformation(angle, displacement)
@@ -143,13 +144,11 @@ class TransformedBody(Body):
 
     @property
     def time(self):
-        Body.time.fget(self)
+        return self._body.time
 
     @time.setter
     def time(self, value):
-        Body.time.fset(self, value)
-        # pass time to parent as well
-        self._parent.time = value
+        self._body.time = value
 
     def get_points_body_frame(self):
         return self._body.get_points()
@@ -170,7 +169,7 @@ class Pitching(TransformedBody):
         self._phase = phase * np.pi / 180
 
     def get_transformation(self):
-        self.angle = self._amplitude * np.sin(self._frequency * self._time
+        self.angle = self._amplitude * np.sin(self._frequency * self.time
                                               + self._phase)
         return super(Pitching, self).get_transformation()
 
@@ -185,7 +184,7 @@ class Heaving(TransformedBody):
         self._phase = phase * np.pi / 180
 
     def get_transformation(self):
-        displacement = self._displacement * np.sin(self._frequency * self._time
+        displacement = self._displacement * np.sin(self._frequency * self.time
                                                    + self._phase)
         self.displacement = displacement
         return super(Heaving, self).get_transformation()
