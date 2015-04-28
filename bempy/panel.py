@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 
 __all__ = ['BoundVortexPanels', 'FreeVortexParticles', 'SourceDoubletPanels']
@@ -19,7 +21,7 @@ class BoundVortexPanels(object):
         # collocation points at 3/4 chord of panel
         # assume first half goes from trailing edge to leading edge,
         #        second half from leading edge back to trailing edge
-        half = self._numpanels / 2
+        half = self._numpanels // 2
         self._xvort = np.hstack([q75[:,:half], q25[:,half:]])
         self._xcoll = np.hstack([q25[:,:half], q75[:,half:]])
         self._gam = np.zeros(self._numpanels)
