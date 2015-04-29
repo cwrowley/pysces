@@ -1,5 +1,5 @@
 import unittest
-from bempy.body import Body
+from bempy.body import Body, naca_airfoil, flat_plate
 from bempy.panel import *
 import numpy as np
 
@@ -23,3 +23,24 @@ class TestPanel(unittest.TestCase):
         body_panels.update_strengths()
         xvort, gam = body_panels.vortices
         self.assertEqual(gam, np.pi)
+
+    def check_shed_vortex(self, body, wake_fac):
+        panels = BoundVortexPanels(body)
+        Uinfty = (1,0)
+        dt = 1
+        panels.update_strengths_unsteady(None, Uinfty, dt, wake_fac=wake_fac)
+        _, gam = panels.vortices
+        x_shed, gam_shed = panels.get_newly_shed()
+        gam_sum = np.sum(gam)
+        self.assertAlmostEqual(gam_shed, -gam_sum)
+        np.testing.assert_array_almost_equal(x_shed, (1 + wake_fac, 0))
+
+    def test_shed_vortex_thick(self):
+        body = naca_airfoil("0012", 8)
+        self.check_shed_vortex(body, 0.2)
+        self.check_shed_vortex(body, 0.3)
+
+    def test_shed_vortex_thin(self):
+        body = flat_plate(8)
+        self.check_shed_vortex(body, 0.2)
+        self.check_shed_vortex(body, 0.3)

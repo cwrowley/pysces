@@ -34,6 +34,16 @@ class BoundVortexPanels(object):
         top, = np.where(np.dot(Uinfty, dq) <= 0)
         self._xvort[:,top] = q75[:,top]
         self._xcoll[:,top] = q25[:,top]
+        # find trailing edge and wake vortex direction
+        if np.linalg.norm(q[:,0] - q[:,-1]) < 0.005:
+            # closed body
+            self._trailing_edge = 0.5 * (q[:,0] + q[:,-1])
+            wake_dir = -0.5 * (dq[:,0] - dq[:,-1])
+            self._wake_dir = wake_dir / np.linalg.norm(wake_dir)
+        else:
+            # thin airfoil
+            self._trailing_edge = q[:,0]
+            self._wake_dir = -dq[:,0] / np.linalg.norm(dq[:,0])
         self._gam = np.zeros(self._numpanels)
         self._influence_matrix = None
 
@@ -68,13 +78,58 @@ class BoundVortexPanels(object):
         """
         r = x - xvort[:,np.newaxis]
         rsq = np.sum(r * r, 0)
-        return -gam / (2 * np.pi) * np.vstack([-r[1], r[0]]) / rsq
+        return gam / (2 * np.pi) * np.vstack([r[1], -r[0]]) / rsq
 
-    def update_strengths(self, wake=None, Uinfty=(1,0)):
-        rhs = self.compute_rhs(wake, Uinfty)
+    def update_strengths(self, Uinfty=(1,0)):
+        """Update vortex strengths"""
+        rhs = self.compute_rhs(Uinfty)
         self._gam = np.linalg.solve(self.influence_matrix, rhs)
 
-    def compute_rhs(self, wake, Uinfty):
+    def update_strengths_unsteady(self, wake, Uinfty, dt, circ=None,
+                                  wake_fac=0.25):
+        """Update strengths for unsteady calculation
+
+        Shed a new wake panel (not added into wake)
+
+        Parameters
+        ----------
+        circ : float
+            Total bound circulation, for enforcing Kelvin's circulation theorem.
+            If None (default), obtain the total circulation from the wake,
+            assuming overall circulation (body + wake) is zero
+        wake_fac : float
+            New wake vortex is placed a distance wake_fac * |Uinfty| * dt from
+            trailing edge (see Katz & Plotkin, p390).
+        """
+
+        # determine new wake vortex position (in body-fixed frame)
+        distance = wake_fac * np.sqrt(Uinfty[0]**2 + Uinfty[1]**2) * dt
+        x_shed = self._trailing_edge + distance * self._wake_dir
+        # compute velocity induced on collocation points by newly shed vortex
+        # (done in the body-fixed frame)
+        shed_vel = self.induced_velocity(self._xcoll, x_shed, 1)
+        shed_normal = np.sum(shed_vel * self._normals, 0)
+        # determine overall influence matrix, including newly shed vortex
+        # last equation: sum of all the vortex strengths = total circulation
+        # import pdb; pdb.set_trace()
+        A = np.vstack([np.hstack([self.influence_matrix,
+                                  shed_normal[:,np.newaxis]]),
+                       np.ones((1, self._numpanels + 1))])
+
+        rhs0 = self.compute_rhs(Uinfty, wake)
+        if circ is None:
+            if wake is None:
+                circ = 0
+            else:
+                circ = -wake.circulation
+        rhs = np.hstack([rhs0, circ])
+
+        gam = np.linalg.solve(A, rhs)
+        self._gam = gam[:-1]
+        self._x_shed = x_shed
+        self._gam_shed = gam[-1]
+
+    def compute_rhs(self, Uinfty=(1,0), wake=None):
         # get collocation points and normals
         motion = self._body.get_motion()
         if motion:
@@ -95,11 +150,22 @@ class BoundVortexPanels(object):
         # compute -v . n
         return -np.sum(vel * normals_inertial, 0)
 
-    def add_wake_panel(self):
-        pass
+    def get_newly_shed(self):
+        """Return newly shed wake vortex in the inertial frame
 
-    def get_wake_panel(self):
-        return None
+        Returns
+        -------
+        x_shed : 1d array, shape (2,)
+            Location of newly shed wake vortex, in inertial frame
+        gam_shed : float
+            Strength of newly shed vortex
+        """
+        motion = self._body.get_motion()
+        if motion:
+            x_shed_inertial = motion.map_position(self._x_shed)
+        else:
+            x_shed_inertial = np.array(self._x_shed, copy=True)
+        return x_shed_inertial, self._gam_shed
 
     @property
     def vortices(self):
