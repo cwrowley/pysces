@@ -14,7 +14,8 @@ before_install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy coverage pip
+  - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip
+  - source activate pyenv
   - conda info -a
 
 # Install packages
