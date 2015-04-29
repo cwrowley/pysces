@@ -1,5 +1,5 @@
 import numpy as np
-from motion import RigidMotion
+from .motion import RigidMotion
 
 __all__ = ['Body', 'TransformedBody', 'Pitching', 'Heaving',
            'cylinder', 'flat_plate', 'naca_airfoil']
