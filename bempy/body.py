@@ -36,7 +36,7 @@ class Body(object):
         """Return the Body object in the body-fixed frame"""
         return self
 
-    def get_transformation(self):
+    def get_motion(self):
         """Return the transformation from the body-fixed to inertial frame"""
         return None
 
@@ -96,17 +96,17 @@ class TransformedBody(object):
         """angles are clockwise, in degrees"""
         self._parent = body
         self._body = body.get_body()
-        self._transformation = RigidMotion(-angle * np.pi / 180, displacement)
+        self._motion = RigidMotion(-angle * np.pi / 180, displacement)
 
     def get_body(self):
         return self._body
 
-    def get_transformation(self):
+    def get_motion(self):
         self._update()
-        return self._transformation.compose(self._parent.get_transformation())
+        return self._motion.compose(self._parent.get_motion())
 
-    def set_transformation(self, value):
-        self._transformation = value
+    def set_motion(self, value):
+        self._motion = value
 
     @property
     def time(self):
@@ -117,14 +117,14 @@ class TransformedBody(object):
         self._body.time = value
 
     def _update(self):
-        # update body transformation: subclasses override this
+        # update body motion: subclasses override this
         pass
 
     def get_points(self, body_frame=False):
         q = self._body.get_points()
         if body_frame:
             return q
-        return self.get_transformation().map_position(q)
+        return self.get_motion().map_position(q)
 
 
 class Pitching(TransformedBody):
@@ -141,7 +141,7 @@ class Pitching(TransformedBody):
         theta = self._frequency * self.time + self._phase
         alpha = self._amplitude * np.sin(theta)
         alphadot = self._amplitude * self._frequency * np.cos(theta)
-        self.set_transformation(RigidMotion(-alpha, (0,0), -alphadot, (0,0)))
+        self.set_motion(RigidMotion(-alpha, (0,0), -alphadot, (0,0)))
 
 
 class Heaving(TransformedBody):
@@ -157,4 +157,4 @@ class Heaving(TransformedBody):
         theta = self._frequency * self.time + self._phase
         x = self._displacement * np.sin(theta)
         xdot = self._displacement * self._frequency * np.cos(theta)
-        self.set_transformation(RigidMotion(0, x, 0, xdot))
+        self.set_motion(RigidMotion(0, x, 0, xdot))

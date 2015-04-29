@@ -9,10 +9,13 @@ class VortexPanels(object):
 
 class BoundVortexPanels(object):
     def __init__(self, body, Uinfty=(1,0)):
-        # Uinfty is used solely to determine direction of panel, for placing
-        # colllocation points and vortex positions
         self._body = body
-        q = body.get_points(body_frame=False)
+        self._update(Uinfty)
+
+    def _update(self, Uinfty=(1,0)):
+        # here, Uinfty is used solely to determine direction of panel, for
+        # placing colllocation points and vortex positions
+        q = self._body.get_points(body_frame=True)
         dq = np.diff(q)
         self._numpanels = dq.shape[1]
         self._normals = (np.vstack([dq[1,:], -dq[0,:]]) /
@@ -30,9 +33,28 @@ class BoundVortexPanels(object):
         self._xvort[:,top] = q75[:,top]
         self._xcoll[:,top] = q25[:,top]
         self._gam = np.zeros(self._numpanels)
+        self._influence_matrix = None
 
     def update_positions(self):
-        self.panels = self._body.get_points()
+        # If non-rigid bodies are used, update panel positions here.
+        #
+        # Note that if the only motion is rigid body motion, the panel positions
+        # do not need to be updated, since they are in body-fixed frame
+
+        # need to recompute influence matrix when points change
+        self._influence_matrix = None
+
+    @property
+    def influence_matrix(self):
+        if self._influence_matrix is None:
+            # time to recompute
+            n = self._numpanels
+            A = np.zeros((n, n))
+            for i, xv in enumerate(np.transpose(self._xvort)):
+                vel = self.induced_velocity(self._xcoll, xv, 1)
+                A[:, i] = np.sum(vel * self._normals, 0)
+            self._influence_matrix = A
+        return self._influence_matrix
 
     @staticmethod
     def induced_velocity(x, xvort, gam):
@@ -44,32 +66,29 @@ class BoundVortexPanels(object):
         return -gam / (2 * np.pi) * np.vstack([-r[1], r[0]]) / rsq
 
     def update_strengths(self, wake=None, Uinfty=(1,0)):
-        # compute influence coefficients and RHS and solve for strengths
         rhs = self.compute_rhs(wake, Uinfty)
-        A = self.compute_influence_matrix()
-        self._gam = np.linalg.solve(A, rhs)
+        self._gam = np.linalg.solve(self.influence_matrix, rhs)
 
     def compute_rhs(self, wake, Uinfty):
+        # get collocation points and normals
+        motion = self._body.get_motion()
+        if motion:
+            xcoll_inertial = motion.map_position(self._xcoll)
+            normals_inertial = motion.map_vector(self._normals)
+        else:
+            xcoll_inertial = self._xcoll
+            normals_inertial = self._normals
         # velocity induced by wake
         if wake:
-            vel = wake.induced_velocity(self._xcoll)
+            vel = wake.induced_velocity(xcoll_inertial)
         else:
             vel = np.zeros((2,self._numpanels))
         # assume body is not deforming: only motion is translation/rotation
-        motion = self._body.get_transformation()
         if motion:
             vel -= motion.map_velocity(self._xcoll)
         vel += np.array(Uinfty)[:,np.newaxis]
         # compute -v . n
-        return -np.sum(vel * self._normals, 0)
-
-    def compute_influence_matrix(self):
-        n = self._numpanels
-        A = np.zeros((n, n))
-        for i, xv in enumerate(np.transpose(self._xvort)):
-            vel = self.induced_velocity(self._xcoll, xv, 1)
-            A[:, i] = np.sum(vel * self._normals, 0)
-        return A
+        return -np.sum(vel * normals_inertial, 0)
 
     def add_wake_panel(self):
         pass

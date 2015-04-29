@@ -7,7 +7,7 @@ alpha_deg = 2 # degrees
 alpha = alpha_deg * np.pi / 180
 
 def compute_gam(body):
-    body = TransformedBody(body, angle=alpha_deg)
+    body = TransformedBody(body, angle=alpha_deg, displacement=(1,2))
     panels = BoundVortexPanels(body)
     panels.update_strengths()
     xvort, gam = panels.vortices

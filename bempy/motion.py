@@ -94,9 +94,12 @@ class RigidMotion(object):
         return RigidMotion(theta, x, thetadot, xdot)
 
     def map_position(self, q):
-        """Return the action of the transformation on the given vectors q
+        """Return the action of the transformation on the given vector(s) q
 
         `q` can be an array of length 2 or a 2d-array with 2 rows
+
+        The group action of the element (R, x) is given by
+            q -> R . q + x
         """
         if self._theta:
             q_new = np.dot(self._R, q)
@@ -108,6 +111,19 @@ class RigidMotion(object):
             else:
                 q_new += self._x[:, np.newaxis]
         return q_new
+
+    def map_vector(self, qdot):
+        """Return the action of the transformation on the tangent vector(s) qdot
+
+        `qdot` can be an array of length 2 or a 2d-array with 2 rows
+
+        The tangent action is given by
+            qdot -> R . qdot
+        """
+        if self._theta:
+            return np.dot(self._R, qdot)
+        else:
+            return np.array(qdot, copy=True)
 
     def map_velocity(self, q, qdot=None):
         """Return the velocity of the transformed base point q, velocity qdot
