@@ -1,0 +1,28 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+
+# install required system libraries
+before_install:
+  # use miniconda to install numpy/scipy, to avoid lengthy build from source
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget http://repo.continuum.io/miniconda/Miniconda-3.4.2-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget http://repo.continuum.io/miniconda/Miniconda3-3.4.2-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy coverage pip
+  - conda info -a
+
+# Install packages
+#install:
+
+# command to run tests
+script:
+  - python runtests.py
