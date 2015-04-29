@@ -1,14 +1,25 @@
 import numpy as np
 from euclid import EuclideanTransformation
 
-__all__ = ['Body', 'Circle', 'Airfoil',
-           'TransformedBody', 'Pitching', 'Heaving']
+__all__ = ['Body', 'TransformedBody', 'Pitching', 'Heaving',
+           'cylinder', 'flat_plate', 'naca_airfoil']
 
 class Body(object):
     """Base class for representing bodies
     """
-    def __init__(self):
+    def __init__(self, points):
+        """Create a body with nodes at the given points
+
+        Parameters
+        ----------
+        points : 2d array, shape (2,n)
+            Array of points defining the boundary of the body
+            For a closed body, the boundary curve should be positively oriented
+            (counter-clockwise around outside of body), starting from trailing
+            edge
+        """
         self._time = 0
+        self._points = points
 
     @property
     def time(self):
@@ -18,74 +29,64 @@ class Body(object):
     def time(self, value):
         self._time = value
 
+    def get_points(self, body_frame=False):
+        return self._points
+
     def get_body(self):
-        """Return the Body object in the body-fixed frame
-        """
+        """Return the Body object in the body-fixed frame"""
         return self
 
     def get_transformation(self):
-        """Return the transformation from the body-fixed to inertial frame
-        """
+        """Return the transformation from the body-fixed to inertial frame"""
         return None
 
-class Circle(Body):
-    """Circle
-    """
-    def __init__(self, radius, num_points):
-        """Return a circle with specified radius and number of points
-        """
-        super(Circle, self).__init__()
-        self._radius = radius
-        th = np.linspace(0, 2 * np.pi, num_points)
-        self._points = radius * np.vstack([np.cos(th), np.sin(th)])
+def cylinder(radius, num_points):
+    """Return a circular Body with the given radius and number of points"""
+    th = np.linspace(0, 2 * np.pi, num_points)
+    points = radius * np.vstack([np.cos(th), np.sin(th)])
+    return Body(points)
 
-    def get_points(self, **kwargs):
-        return self._points
+def flat_plate(num_points):
+    """Return a flat plate with the given number of points"""
+    x = np.linspace(1, 0, num_points)
+    y = np.zeros_like(x)
+    return Body(np.vstack([x, y]))
 
+def naca_airfoil(code, num_points, zero_thick_te=False, uniform=False):
+    """Return a NACA 4-digit series airfoil"""
+    # extract parameters from 4-digit code
+    code_str = "%04d" % int(code)
+    if len(code_str) != 4:
+        raise ValueError("NACA designation is more than 4 digits")
+    max_camber = 0.01 * int(code_str[0])
+    p = 0.1 * int(code_str[1])  # location of max camber
+    thickness = 0.01 * int(code_str[2:])
+    if uniform:
+        x = np.linspace(0, 1, num_points)
+    else:
+        # closer spacing near leading edge
+        theta = np.linspace(0, 0.5 * np.pi, num_points)
+        x = 1 - np.cos(theta)
 
-class Airfoil(Body):
-    """NACA 4-digit series airfoil
-    """
-    def __init__(self, code, num_points, zero_thick_te=False, uniform=False):
-        """Return a NACA 4-digit series airfoil
-        """
-        super(Airfoil, self).__init__()
-        # extract parameters from 4-digit code
-        code_str = "%04d" % int(code)
-        if len(code_str) != 4:
-            raise ValueError("NACA designation is more than 4 digits")
-        max_camber = 0.01 * int(code_str[0])
-        p = 0.1 * int(code_str[1])  # location of max camber
-        thickness = 0.01 * int(code_str[2:])
-        if uniform:
-            x = np.linspace(0, 1, num_points)
-        else:
-            # closer spacing near leading edge
-            theta = np.linspace(0, 0.5 * np.pi, num_points)
-            x = 1 - np.cos(theta)
+    # thickness
+    coefs = [-0.1015, 0.2843, -0.3516, -0.1260, 0, 0.2969]
+    if zero_thick_te:
+        coefs[0] = -0.1036
+    y_thick = 5 * thickness * (np.polyval(coefs[:5], x) +
+                               coefs[5] * np.sqrt(x))
 
-        # thickness
-        coefs = [-0.1015, 0.2843, -0.3516, -0.1260, 0, 0.2969]
-        if zero_thick_te:
-            coefs[0] = -0.1036
-        y_thick = 5 * thickness * (np.polyval(coefs[:5], x) +
-                                   coefs[5] * np.sqrt(x))
-
-        # camber
-        front = np.where(x <= p)
-        back = np.where(x > p)
-        y_camber = np.zeros_like(x)
-        if p:
-            y_camber[front] = max_camber * x[front] / p**2 * (2 * p - x[front])
-            y_camber[back] = max_camber * ((1. - x[back])/(1. - p)**2 *
-                                           (1 + x[back] - 2 * p))
-        x = np.hstack([x[-1:0:-1], x])
-        y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
-                       y_camber - y_thick])
-        self._points = np.vstack([x, y])
-
-    def get_points(self, **kwargs):
-        return self._points
+    # camber
+    front = np.where(x <= p)
+    back = np.where(x > p)
+    y_camber = np.zeros_like(x)
+    if p:
+        y_camber[front] = max_camber * x[front] / p**2 * (2 * p - x[front])
+        y_camber[back] = max_camber * ((1. - x[back])/(1. - p)**2 *
+                                       (1 + x[back] - 2 * p))
+    x = np.hstack([x[-1:0:-1], x])
+    y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
+                   y_camber - y_thick])
+    return Body(np.vstack([x, y]))
 
 
 class TransformedBody(object):

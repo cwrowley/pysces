@@ -1,8 +1,9 @@
 from bempy import *
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-airfoil = Airfoil("0012", 20)      # NACA 0012 airfoil with 20 points per side
+airfoil = naca_airfoil("0012", 20) # NACA 0012 airfoil with 20 points per side
 airfoil = TransformedBody(airfoil, displacement=(-0.25, 0))
 airfoil = Pitching(airfoil, 10, 2*np.pi, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), 2*np.pi, phase=0)

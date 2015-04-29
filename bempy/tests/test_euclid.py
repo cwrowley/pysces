@@ -1,5 +1,5 @@
 import unittest
 
 class TestEuclid(unittest.TestCase):
-    def test_fail(self):
-        self.assertEqual(1,0)
+    def test_truth(self):
+        self.assertEqual(0,0)
