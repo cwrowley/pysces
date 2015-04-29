@@ -27,4 +27,16 @@ To generate a nice html report, use::
 
   $ coverage html
 
-and then open the files generated in the directory `htmlcov/`.
+and then open the files generated in the directory ``htmlcov/``.
+
+Documentation
+=============
+
+Documentation is generated using `sphinx <http://sphinx-doc.org>`_ and `numpydoc
+<https://pypi.python.org/pypi/numpydoc>`_.  Once these are installed, you can
+build the documentation as follows::
+
+  $ cd doc
+  $ make html
+
+The generated documentation will then be in the directory ``doc/_build/html``.

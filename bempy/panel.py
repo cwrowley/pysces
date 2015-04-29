@@ -8,6 +8,8 @@ class VortexPanels(object):
     pass
 
 class BoundVortexPanels(object):
+    """A class for bound vortex panels"""
+
     def __init__(self, body, Uinfty=(1,0)):
         self._body = body
         self._update(Uinfty)
@@ -58,9 +60,12 @@ class BoundVortexPanels(object):
 
     @staticmethod
     def induced_velocity(x, xvort, gam):
-        """Compute velocity induced at points x by vortex at (xvort, gam)
+        r"""Compute velocity induced at points x by vortex at (xvort, gam)
 
-        Induced velocity is u_theta = -gam / (2 pi r)"""
+        Induced velocity is
+
+        .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
+        """
         r = x - xvort[:,np.newaxis]
         rsq = np.sum(r * r, 0)
         return -gam / (2 * np.pi) * np.vstack([-r[1], r[0]]) / rsq

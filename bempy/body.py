@@ -23,6 +23,7 @@ class Body(object):
 
     @property
     def time(self):
+        """The time used to specify the body's motion"""
         return self._time
 
     @time.setter
