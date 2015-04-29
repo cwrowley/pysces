@@ -1,5 +1,6 @@
-bempy: a Boundary Element Method for Python
-===========================================
+=============================================
+ bempy: a Boundary Element Method for Python
+=============================================
 
 This package implements a boundary element method for solving for the fluid flow
 around streamlined bodies moving in a potential flow.  The goal is to provide a
@@ -9,3 +10,21 @@ computationally efficient.
 Clancy Rowley
 
 April, 2015
+
+Testing and coverage
+====================
+
+Automated tests are provided, and may be run with::
+
+  $ python runtests.py
+
+You can also generate a coverage report as follows::
+
+  $ coverage run runtests.py
+  $ coverage report -m
+
+To generate a nice html report, use::
+
+  $ coverage html
+
+and then open the files generated in the directory `htmlcov/`.
