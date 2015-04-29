@@ -14,7 +14,7 @@ before_install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip
+  - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip nose
   - source activate pyenv
   - conda info -a
 
@@ -23,4 +23,4 @@ before_install:
 
 # command to run tests
 script:
-  - python runtests.py
+  - nosetests --with-cov --cover-package bempy
