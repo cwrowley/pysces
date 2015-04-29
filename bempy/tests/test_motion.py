@@ -1,7 +1,6 @@
 from bempy.motion import *
 import unittest
 import numpy as np
-# from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 class TestRigidMotion(unittest.TestCase):
     def assert_motion_almost_equal(self, g, h):
@@ -37,7 +36,7 @@ class TestRigidMotion(unittest.TestCase):
         g2 = RigidMotion(0, (2,3))
         g3 = RigidMotion(np.pi/2, (2,3))
         self.assertEqual(g2.compose(g1), g3)
-        g4 = RigidMotion(np.pi/2, (3,-2))
+        g4 = RigidMotion(np.pi/2, (-3,2))
         self.assert_motion_almost_equal(g1.compose(g2), g4)
 
     def test_inverse(self):
@@ -57,34 +56,45 @@ class TestRigidMotion(unittest.TestCase):
     def test_map_position(self):
         rot = RigidMotion(np.pi/2, (1,2))
         x = np.array((13, 42))
-        y = (43, -11)
+        y = (-41, 15)
         np.testing.assert_array_almost_equal(rot.map_position(x), y)
 
         xarr = np.array([[13,13],[42,42]])
-        yarr = np.array([[43,43],[-11,-11]])
+        yarr = np.array([[-41,-41],[15,15]])
         np.testing.assert_array_almost_equal(rot.map_position(xarr), yarr)
-
 
     def test_map_velocity_inplace(self):
         rot = RigidMotion(0, (0,0), 3, (0,0))
         x = np.array((1, 0))
-        v = np.array((0, -3))
+        v = np.array((0, 3))
+        x2 = np.array((0, 1))
+        v2 = np.array((-3, 0))
         np.testing.assert_array_almost_equal(rot.map_velocity(x), v)
         np.testing.assert_array_almost_equal(rot.map_velocity(2*x), 2*v)
+        np.testing.assert_array_almost_equal(rot.map_velocity(x2), v2)
+        np.testing.assert_array_almost_equal(rot.map_velocity(2*x2), 2*v2)
 
         vel = np.array((4,5))
         rot2 = RigidMotion(0, (0,0), 3, vel)
         np.testing.assert_array_almost_equal(rot2.map_velocity(x), v + vel)
         np.testing.assert_array_almost_equal(rot2.map_velocity(2*x), 2*v + vel)
+        np.testing.assert_array_almost_equal(rot2.map_velocity(x2), v2 + vel)
+        np.testing.assert_array_almost_equal(rot2.map_velocity(2*x2), 2*v2 + vel)
 
     def test_map_velocity_rot(self):
         rot = RigidMotion(np.pi/2, (42,13), 3, (0,0))
         x = np.array((1, 0))
         v = np.array((-3, 0))
+        x2 = np.array((0, 1))
+        v2 = np.array((0, -3))
         np.testing.assert_array_almost_equal(rot.map_velocity(x), v)
         np.testing.assert_array_almost_equal(rot.map_velocity(2*x), 2*v)
+        np.testing.assert_array_almost_equal(rot.map_velocity(x2), v2)
+        np.testing.assert_array_almost_equal(rot.map_velocity(2*x2), 2*v2)
 
         vel = np.array((4,5))
         rot2 = RigidMotion(np.pi/2, (42,13), 3, vel)
         np.testing.assert_array_almost_equal(rot2.map_velocity(x), v + vel)
         np.testing.assert_array_almost_equal(rot2.map_velocity(2*x), 2*v + vel)
+        np.testing.assert_array_almost_equal(rot2.map_velocity(x2), v2 + vel)
+        np.testing.assert_array_almost_equal(rot2.map_velocity(2*x2), 2*v2 + vel)

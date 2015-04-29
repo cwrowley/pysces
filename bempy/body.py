@@ -93,9 +93,10 @@ class TransformedBody(object):
     """Base class for rigid (Euclidean) transformations of existing bodies
     """
     def __init__(self, body, angle=0, displacement=(0,0)):
+        """angles are clockwise, in degrees"""
         self._parent = body
         self._body = body.get_body()
-        self._transformation = RigidMotion(angle * np.pi / 180, displacement)
+        self._transformation = RigidMotion(-angle * np.pi / 180, displacement)
 
     def get_body(self):
         return self._body
@@ -140,7 +141,7 @@ class Pitching(TransformedBody):
         theta = self._frequency * self.time + self._phase
         alpha = self._amplitude * np.sin(theta)
         alphadot = self._amplitude * self._frequency * np.cos(theta)
-        self.set_transformation(RigidMotion(alpha, (0,0), alphadot, (0,0)))
+        self.set_transformation(RigidMotion(-alpha, (0,0), -alphadot, (0,0)))
 
 
 class Heaving(TransformedBody):

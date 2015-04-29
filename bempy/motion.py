@@ -37,8 +37,8 @@ class RigidMotion(object):
     def _update(self):
         c = np.cos(self._theta)
         s = np.sin(self._theta)
-        self._R = np.array([[c, s], [-s, c]])
-        self._Rdot = np.array([[-s, c], [-c, -s]]) * self._thetadot
+        self._R = np.array([[c, -s], [s, c]])
+        self._Rdot = np.array([[-s, -c], [c, -s]]) * self._thetadot
 
     @property
     def x(self):
