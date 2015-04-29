@@ -58,7 +58,7 @@ class BoundVortexPanels(object):
         # assume body is not deforming: only motion is translation/rotation
         motion = self._body.get_transformation()
         if motion:
-            vel -= motion.xform_velocity(self._xcoll)
+            vel -= motion.map_velocity(self._xcoll)
         vel += np.array(Uinfty)[:,np.newaxis]
         # compute -v . n
         return -np.sum(vel * self._normals, 0)

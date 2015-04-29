@@ -1,5 +1,5 @@
 import numpy as np
-from euclid import EuclideanTransformation
+from motion import RigidMotion
 
 __all__ = ['Body', 'TransformedBody', 'Pitching', 'Heaving',
            'cylinder', 'flat_plate', 'naca_airfoil']
@@ -90,34 +90,22 @@ def naca_airfoil(code, num_points, zero_thick_te=False, uniform=False):
 
 
 class TransformedBody(object):
-    """Base class for Euclidean transformations of existing bodies
+    """Base class for rigid (Euclidean) transformations of existing bodies
     """
     def __init__(self, body, angle=0, displacement=(0,0)):
         self._parent = body
         self._body = body.get_body()
-        self._transformation = EuclideanTransformation(angle, displacement)
+        self._transformation = RigidMotion(angle * np.pi / 180, displacement)
 
     def get_body(self):
         return self._body
 
     def get_transformation(self):
+        self._update()
         return self._transformation.compose(self._parent.get_transformation())
 
-    @property
-    def displacement(self):
-        return self._transformation.displacement
-
-    @displacement.setter
-    def displacement(self, value):
-        self._transformation.displacement = value
-
-    @property
-    def angle(self):
-        return self._transformation.angle
-
-    @angle.setter
-    def angle(self, value):
-        self._transformation.angle = value
+    def set_transformation(self, value):
+        self._transformation = value
 
     @property
     def time(self):
@@ -127,26 +115,32 @@ class TransformedBody(object):
     def time(self, value):
         self._body.time = value
 
+    def _update(self):
+        # update body transformation: subclasses override this
+        pass
+
     def get_points(self, body_frame=False):
         q = self._body.get_points()
         if body_frame:
             return q
-        return self.get_transformation().xform_position(q)
+        return self.get_transformation().map_position(q)
 
 
 class Pitching(TransformedBody):
     """Sinusoidal pitching for an existing body
     """
     def __init__(self, body, amplitude, frequency, phase=0.):
+        """amplitude and phase given in degrees"""
         super(Pitching, self).__init__(body)
-        self._amplitude = amplitude
+        self._amplitude = amplitude * np.pi / 180
         self._frequency = frequency
         self._phase = phase * np.pi / 180
 
-    def get_transformation(self):
-        self.angle = self._amplitude * np.sin(self._frequency * self.time
-                                              + self._phase)
-        return super(Pitching, self).get_transformation()
+    def _update(self):
+        theta = self._frequency * self.time + self._phase
+        alpha = self._amplitude * np.sin(theta)
+        alphadot = self._amplitude * self._frequency * np.cos(theta)
+        self.set_transformation(RigidMotion(alpha, (0,0), alphadot, (0,0)))
 
 
 class Heaving(TransformedBody):
@@ -158,8 +152,8 @@ class Heaving(TransformedBody):
         self._frequency = frequency
         self._phase = phase * np.pi / 180
 
-    def get_transformation(self):
-        displacement = self._displacement * np.sin(self._frequency * self.time
-                                                   + self._phase)
-        self.displacement = displacement
-        return super(Heaving, self).get_transformation()
+    def _update(self):
+        theta = self._frequency * self.time + self._phase
+        x = self._displacement * np.sin(theta)
+        xdot = self._displacement * self._frequency * np.cos(theta)
+        self.set_transformation(RigidMotion(0, x, 0, xdot))
