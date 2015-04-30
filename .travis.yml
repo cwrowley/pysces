@@ -16,6 +16,7 @@ before_install:
   - conda update -q conda
   - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip nose
   - source activate pyenv
+  - pip install coveralls
   - conda info -a
 
 # Install packages
@@ -24,3 +25,6 @@ before_install:
 # command to run tests
 script:
   - nosetests --with-cov --cover-package bempy
+
+after_success:
+  - coveralls --config_file .coveragerc
