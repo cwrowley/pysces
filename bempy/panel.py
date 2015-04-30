@@ -7,7 +7,23 @@ __all__ = ['BoundVortexPanels', 'FreeVortexParticles', 'SourceDoubletPanels']
 class VortexPanels(object):
     pass
 
-class BoundVortexPanels(object):
+class LumpedVortex(object):
+    """A base class for schemes based on vortex particles"""
+
+    @staticmethod
+    def induced_velocity_single(x, xvort, gam):
+        r"""Compute velocity induced at points x by vortex at (xvort, gam)
+
+        Induced velocity is
+
+        .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
+        """
+        r = x - xvort[:,np.newaxis]
+        rsq = np.maximum(np.sum(r * r, 0), 1.e-6)
+        vel = gam / (2 * np.pi) * np.vstack([r[1], -r[0]]) / rsq
+        return vel
+
+class BoundVortexPanels(LumpedVortex):
     """A class for bound vortex panels"""
 
     def __init__(self, body, Uinfty=(1,0)):
@@ -63,22 +79,17 @@ class BoundVortexPanels(object):
             n = self._numpanels
             A = np.zeros((n, n))
             for i, xv in enumerate(np.transpose(self._xvort)):
-                vel = self.induced_velocity(self._xcoll, xv, 1)
+                vel = self.induced_velocity_single(self._xcoll, xv, 1)
                 A[:, i] = np.sum(vel * self._normals, 0)
             self._influence_matrix = A
         return self._influence_matrix
 
-    @staticmethod
-    def induced_velocity(x, xvort, gam):
-        r"""Compute velocity induced at points x by vortex at (xvort, gam)
-
-        Induced velocity is
-
-        .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
-        """
-        r = x - xvort[:,np.newaxis]
-        rsq = np.sum(r * r, 0)
-        return gam / (2 * np.pi) * np.vstack([r[1], -r[0]]) / rsq
+    def induced_velocity(self, x):
+        """Compute the induced velocity at the given point(s)"""
+        vel = np.zeros_like(x)
+        for xvort, gam in zip(np.transpose(self._xvort), self._gam):
+            vel += self.induced_velocity_single(x, xvort, gam)
+        return vel
 
     def update_strengths(self, Uinfty=(1,0)):
         """Update vortex strengths"""
@@ -107,11 +118,10 @@ class BoundVortexPanels(object):
         x_shed = self._trailing_edge + distance * self._wake_dir
         # compute velocity induced on collocation points by newly shed vortex
         # (done in the body-fixed frame)
-        shed_vel = self.induced_velocity(self._xcoll, x_shed, 1)
+        shed_vel = self.induced_velocity_single(self._xcoll, x_shed, 1)
         shed_normal = np.sum(shed_vel * self._normals, 0)
         # determine overall influence matrix, including newly shed vortex
         # last equation: sum of all the vortex strengths = total circulation
-        # import pdb; pdb.set_trace()
         A = np.vstack([np.hstack([self.influence_matrix,
                                   shed_normal[:,np.newaxis]]),
                        np.ones((1, self._numpanels + 1))])
@@ -179,22 +189,62 @@ class BoundVortexPanels(object):
     def normals(self):
         return self._normals[0,:], self._normals[1,:]
 
-class FreeVortexParticles(object):
+class FreeVortexParticles(LumpedVortex):
     def __init__(self):
-        pass
+        self.reset()
 
-    def update(self, body, Uinfty, dt):
-        pass
+    def reset(self):
+        self._x_vortices = None
+        self._gamma = list()
+        self._num_vortices = 0
+        self._circulation = 0
 
-    def add_panels(self, panels):
-        pass
+    @property
+    def circulation(self):
+        return self._circulation
 
-    def induced_velocity(self, xcoll):
-        return 0
+    def advect(self, body, Uinfty, dt):
+        # explicit Euler update
+        vel = np.zeros((2,self._num_vortices))
+        vel += body.induced_velocity(self._x_vortices)
+        vel += self.induced_velocity(self._x_vortices)
+        vel += np.array(Uinfty)[:, np.newaxis]
+        self._x_vortices += vel * dt
+
+    def add_vortex(self, x, gamma):
+        """Add a vortex to the list
+
+        Parameters
+        ----------
+        x : 1d array, length 2
+            Position of the new vortex
+        gamma : float
+            Strength of the new vortex
+        """
+        if self._x_vortices is None:
+            self._x_vortices = x[:,np.newaxis]
+        else:
+            self._x_vortices = np.append(self._x_vortices,
+                                         x[:,np.newaxis], axis=1)
+        self._gamma.append(gamma)
+        self._num_vortices += 1
+        self._circulation += gamma
+
+    def add_newly_shed(self, body):
+        """Add a vortex newly shed from a body"""
+        x_vort, gam = body.get_newly_shed()
+        self.add_vortex(x_vort, gam)
+
+    def induced_velocity(self, x):
+        """Compute the induced velocity at the given point(s)"""
+        vel = np.zeros_like(x)
+        for xvort, gam in zip(np.transpose(self._x_vortices), self._gamma):
+            vel += self.induced_velocity_single(x, xvort, gam)
+        return vel
 
     @property
     def vortices(self):
-        return np.array([0,0]), 0
+        return self._x_vortices, self._gamma
 
 
 class SourceDoubletPanels(object):

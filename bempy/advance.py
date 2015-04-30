@@ -7,7 +7,7 @@ def time_advance(body, wake, Uinfty, dt):
     # 1) define the wake panel: need Uinf and dt to determine length
     # 2) to determine rhs for update_strengths, need Uinf for relative vel
     # 3) wake update needs Uinf and dt (relative vel)
-    body.update_strengths(wake, Uinfty) # might need dt to determine length of TE panel
-    wake.update(body, Uinfty, dt)
-    shed_panels = body.get_wake_panel()
-    wake.add_panels(shed_panels)
+    wake.advect(body, Uinfty, dt)
+    body.update_strengths_unsteady(wake, Uinfty, dt)
+    x_shed, gam_shed = body.get_newly_shed()
+    wake.add_vortex(x_shed, gam_shed)

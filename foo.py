@@ -39,3 +39,27 @@ def main3():
         body_panels.update_strengths(wake_panels)
         wake_panels.update()
         wake_panels.add_panels(shed_panel)
+
+def main4():
+    body = naca_airfoil("0012", 20)
+    body = Pitching(body, 10, 2 * np.pi)
+    Uinfty = (1,0)
+    dt = 0.1
+    flow = Simulation(body, Uinfty, dt, BoundVortexPanels, FreeVortexParticles)
+    for i in range(num_steps):
+        flow.advance(dt)
+        # get any output
+
+# try out staticmethods with derived classes
+class A(object):
+    def foo(self):
+        print("My name is %s" % self.name())
+
+    @staticmethod
+    def name():
+        return "Alice"
+
+class B(A):
+    @staticmethod
+    def name():
+        return "Bob"
