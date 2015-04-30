@@ -5,7 +5,7 @@
 .. image:: https://travis-ci.org/cwrowley/bempy.svg?branch=master
     :target: https://travis-ci.org/cwrowley/bempy
 
-.. image:: https://coveralls.io/repos/cwrowley/bempy/badge.svg
+.. image:: https://coveralls.io/repos/cwrowley/bempy/badge.svg?branch=master
   :target: https://coveralls.io/r/cwrowley/bempy
 
 This python package implements a boundary element method for solving for the
