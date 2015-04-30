@@ -32,6 +32,7 @@ and then open the files generated in the directory ``htmlcov/``.
 Documentation
 =============
 
+The documentation is available online at http://pysces.readthedocs.org/ .
 Documentation is generated using `sphinx <http://sphinx-doc.org>`_ and `numpydoc
 <https://pypi.python.org/pypi/numpydoc>`_.  Once these are installed, you can
 build the documentation as follows::
