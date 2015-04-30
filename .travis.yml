@@ -24,7 +24,7 @@ install:
 
 # command to run tests
 script:
-  - nosetests --with-cov --cover-package bempy
+  - nosetests --with-cov --cover-package pysces
 
 after_success:
   - coveralls

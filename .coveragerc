@@ -1,6 +1,6 @@
 [run]
-source = bempy
-omit = bempy/tests/*
+source = pysces
+omit = pysces/tests/*
 
 [report]
 exclude_lines =
