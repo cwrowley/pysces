@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-from bempy import *
+from pysces import *
 import matplotlib.pyplot as plt
 
 body = naca_airfoil("0012", 16)

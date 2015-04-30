@@ -1,4 +1,4 @@
-from bempy import *
+from pysces import *
 import matplotlib.pyplot as plt
 
 airfoil = naca_airfoil("2412", 20)   # NACA 2412 airfoil with 20 points per side

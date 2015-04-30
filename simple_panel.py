@@ -1,5 +1,5 @@
 import numpy as np
-from bempy import *
+from pysces import *
 
 # x = [1,0]
 # y = [0,0]

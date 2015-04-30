@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-from bempy import *
+from pysces import *
 import matplotlib.pyplot as plt
 
 alpha_deg = 2 # degrees
