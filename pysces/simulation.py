@@ -37,7 +37,7 @@ class Simulation(object):
         if not dt:
             dt = self._dt
         Uinfty = self._Uinfty
-        self._wake.advect(self._body_panels, Uinfty, dt)
+        self._wake.advect(dt, Uinfty, self._body_panels)
         self._time += dt
         self._body.time = self._time
         self._body_panels.update_strengths_unsteady(self._wake, Uinfty, dt)

@@ -9,17 +9,41 @@ class VortexPanels(object):
 
 class LumpedVortex(object):
     """A base class for schemes based on vortex particles"""
+    _core_radius = 1.e-3
 
-    @staticmethod
-    def induced_velocity_single(x, xvort, gam):
+    @property
+    def core_radius(self):
+        r"""Radius to use for regularization of the induced velocity
+
+        For points closer than ``core_radius``, the vortex is
+        treated as inducing solid-body rotation.
+
+        See also
+        --------
+        induced_velocity_single
+
+        """
+        return self._core_radius
+
+    @core_radius.setter
+    def core_radius(self, value):
+        self._core_radius = value
+
+    def induced_velocity_single(self, x, xvort, gam):
         r"""Compute velocity induced at points x by vortex at (xvort, gam)
 
         Induced velocity is
 
         .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
+
+        where r is the distance between the point and the vortex.  If this
+        distance is less than :class:`core_radius` :math:`r_0`, the velocity is
+        regularized as solid-body rotation, with
+
+        .. math:: u_\theta = -\frac{\Gamma r}{2\pi r_0^2}`
         """
         r = x - xvort[:,np.newaxis]
-        rsq = np.maximum(np.sum(r * r, 0), 1.e-6)
+        rsq = np.maximum(np.sum(r * r, 0), self.core_radius**2)
         vel = gam / (2 * np.pi) * np.vstack([r[1], -r[0]]) / rsq
         return vel
 
@@ -206,14 +230,35 @@ class FreeVortexParticles(LumpedVortex):
 
     @property
     def circulation(self):
+        """Total circulation of the vortex particles"""
         return self._circulation
 
-    def advect(self, body, Uinfty, dt):
+    def advect(self, dt, Uinfty=(0,0), body=None):
+        """Advect the vortex particles forward one step in time
+
+        Parameters
+        ----------
+        dt : float
+            Timestep
+        Uinfty : array_like, optional
+            Farfield velocity, default (0,0)
+        body : vortex panel object (optional)
+            Optional body also contributing to induced velocity of the particles
+
+        Notes
+        -----
+        An explicit Euler update is used, where the particle positions are
+        incremented by ``vel * dt``, where ``vel`` is the induced velocity
+
+        """
         # explicit Euler update
-        vel = np.zeros((2,self._num_vortices))
-        vel += body.induced_velocity(self._x_vortices)
-        vel += self.induced_velocity(self._x_vortices)
-        vel += np.array(Uinfty)[:, np.newaxis]
+        vel = self.induced_velocity(self._x_vortices)
+        if body:
+            vel += body.induced_velocity(self._x_vortices)
+        if Uinfty is not None:
+            Uinfty = np.array(Uinfty)
+            if Uinfty.any():
+                vel += Uinfty[:, np.newaxis]
         self._x_vortices += vel * dt
 
     def add_vortex(self, x, gamma):
@@ -221,7 +266,7 @@ class FreeVortexParticles(LumpedVortex):
 
         Parameters
         ----------
-        x : 1d array, length 2
+        x : 1d array
             Position of the new vortex
         gamma : float
             Strength of the new vortex
