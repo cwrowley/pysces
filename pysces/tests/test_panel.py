@@ -1,6 +1,6 @@
 import unittest
-from bempy.body import Body, naca_airfoil, flat_plate
-from bempy.panel import *
+from pysces.body import Body, naca_airfoil, flat_plate
+from pysces.panel import *
 import numpy as np
 
 class TestPanel(unittest.TestCase):

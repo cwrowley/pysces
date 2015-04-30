@@ -1,5 +1,5 @@
 """
-The :mod:`bempy` package implements a boundary element method for inviscid
+The :mod:`pysces` package implements a boundary element method for inviscid
 fluid flows.
 """
 

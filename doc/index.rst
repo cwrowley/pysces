@@ -1,10 +1,10 @@
-.. bempy documentation master file, created by
+.. pysces documentation master file, created by
    sphinx-quickstart on Wed Apr 29 11:19:33 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-bempy: Boundary Element Method for Python
-=========================================
+pysces: Boundary Element Method for Python
+==========================================
 
 This package implements a boundary element method for solving for the fluid flow
 around streamlined bodies moving in a potential flow.  The goal is to provide a
@@ -34,7 +34,7 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   bempy
+   pysces
 
 Indices and tables
 ==================

@@ -2,11 +2,11 @@
  Function reference
 ====================
 
-.. automodule:: bempy
+.. automodule:: pysces
    :no-members:
    :no-inherited-members:
 
-.. currentmodule:: bempy
+.. currentmodule:: pysces
 
 Generating bodies
 =================

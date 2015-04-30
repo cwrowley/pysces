@@ -104,12 +104,17 @@ class BoundVortexPanels(LumpedVortex):
 
         Parameters
         ----------
-        circ : float
+        wake : wake panel object
+        Uinfty : array_like, shape (2,)
+            Farfield fluid velocity
+        dt : float
+            Timestep
+        circ : float (optional)
             Total bound circulation, for enforcing Kelvin's circulation theorem.
             If None (default), obtain the total circulation from the wake,
             assuming overall circulation (body + wake) is zero
-        wake_fac : float
-            New wake vortex is placed a distance wake_fac * |Uinfty| * dt from
+        wake_fac : float (optional)
+            New wake vortex is placed a distance wake_fac * Uinfty * dt from
             trailing edge (see Katz & Plotkin, p390).
         """
 

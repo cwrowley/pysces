@@ -1,4 +1,4 @@
-from bempy.motion import *
+from pysces.motion import *
 import unittest
 import numpy as np
 

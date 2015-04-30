@@ -1,6 +1,6 @@
-=============================================
- bempy: a Boundary Element Method for Python
-=============================================
+==============================================
+ pysces: a boundary element solver for python
+==============================================
 
 .. image:: https://travis-ci.org/cwrowley/bempy.svg?branch=master
     :target: https://travis-ci.org/cwrowley/bempy
