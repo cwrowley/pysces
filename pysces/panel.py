@@ -30,8 +30,20 @@ class LumpedVortex(object):
         self._core_radius = value
 
     def induced_velocity_single(self, x, xvort, gam):
-        r"""Compute velocity induced at points x by vortex at (xvort, gam)
+        r"""Compute velocity induced at points x by a single vortex
 
+        Parameters
+        ----------
+        x : 2d array
+            Locations at which to compute induced velocity.  Expressed as
+            column vectors (i.e., shape should be (2,n))
+        xvort : 1d array
+            Location of vortex (shape should be (2,1))
+        gam : float
+            Strength of vortex
+
+        Notes
+        -----
         Induced velocity is
 
         .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
@@ -44,6 +56,8 @@ class LumpedVortex(object):
         """
         r = x - xvort[:,np.newaxis]
         rsq = np.maximum(np.sum(r * r, 0), self.core_radius**2)
+        # alternative regularization (Krasny, Eldredge)
+        # rsq = np.sum(r * r, 0) + self._core_radius**2
         vel = gam / (2 * np.pi) * np.vstack([r[1], -r[0]]) / rsq
         return vel
 
@@ -109,10 +123,27 @@ class BoundVortexPanels(LumpedVortex):
         return self._influence_matrix
 
     def induced_velocity(self, x):
-        """Compute the induced velocity at the given point(s)"""
+        """Compute the induced velocity at the given point(s)
+
+        Parameters
+        ----------
+        x : 2d array
+            Locations at which to compute induced velocity.  Expressed as
+            column vectors (i.e., shape should be (2,n))
+
+        See also
+        --------
+        induced_velocity_single
+
+        """
+        # transform vortex positions to inertial frame
+        motion = self._body.get_motion()
+        xvort_in = motion.map_position(self._xvort) if motion else self._xvort
         vel = np.zeros_like(x)
-        for xvort, gam in zip(np.transpose(self._xvort), self._gam):
-            vel += self.induced_velocity_single(x, xvort, gam)
+        # TODO: write test exposing the following bug (computing wrt body frame)
+        # for xv, gam in zip(np.transpose(self._xvort), self._gam):
+        for xv, gam in zip(np.transpose(xvort_in), self._gam):
+            vel += self.induced_velocity_single(x, xv, gam)
         return vel
 
     def update_strengths(self, Uinfty=(1,0)):
