@@ -83,7 +83,7 @@ class Vortices(object):
         distance is less than :class:`core_radius` :math:`r_0`, the velocity is
         regularized as solid-body rotation, with
 
-        .. math:: u_\theta = -\frac{\Gamma r}{2\pi r_0^2}`
+        .. math:: u_\theta = -\frac{\Gamma r}{2\pi r_0^2}
         """
         r = np.array(x, ndmin=2) - np.array(xvort)
         rsq = np.maximum(np.sum(r * r, 1), self.core_radius**2)

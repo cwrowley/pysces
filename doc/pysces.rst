@@ -26,7 +26,7 @@ Panel methods
 .. autosummary::
    :toctree: generated/
 
+   Vortices
    BoundVortexPanels
-   FreeVortexParticles
    SourceDoubletPanels
 
