@@ -25,7 +25,7 @@ class Simulation(object):
         self._time = 0
         self._body.time = 0
         self._wake.reset()
-        self._body_panels.update_strengths_unsteady(None, self._Uinfty, self._dt)
+        self._body_panels.update_strengths_unsteady(self._dt, self._Uinfty)
         self._wake.add_newly_shed(self._body_panels)
 
     def advance(self, dt=None):
@@ -36,11 +36,10 @@ class Simulation(object):
         """
         if not dt:
             dt = self._dt
-        Uinfty = self._Uinfty
-        self._wake.advect(dt, Uinfty, self._body_panels)
+        self._wake.advect(dt, self._Uinfty, self._body_panels)
         self._time += dt
         self._body.time = self._time
-        self._body_panels.update_strengths_unsteady(self._wake, Uinfty, dt)
+        self._body_panels.update_strengths_unsteady(dt, self._Uinfty, self._wake)
         self._wake.add_newly_shed(self._body_panels)
 
     @property

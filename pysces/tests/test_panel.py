@@ -28,7 +28,7 @@ class TestPanel(unittest.TestCase):
         panels = BoundVortexPanels(body)
         Uinfty = (1,0)
         dt = 1
-        panels.update_strengths_unsteady(None, Uinfty, dt, wake_fac=wake_fac)
+        panels.update_strengths_unsteady(dt, Uinfty, None, wake_fac=wake_fac)
         _, gam = panels.vortices
         x_shed, gam_shed = panels.get_newly_shed()
         gam_sum = np.sum(gam)
@@ -44,3 +44,6 @@ class TestPanel(unittest.TestCase):
         body = flat_plate(8)
         self.check_shed_vortex(body, 0.2)
         self.check_shed_vortex(body, 0.3)
+
+    def test_regularization(self):
+        pass

@@ -120,7 +120,7 @@ class BoundVortexPanels(LumpedVortex):
         rhs = self.compute_rhs(Uinfty)
         self._gam = np.linalg.solve(self.influence_matrix, rhs)
 
-    def update_strengths_unsteady(self, wake, Uinfty, dt, circ=None,
+    def update_strengths_unsteady(self, dt, Uinfty=(1,0), wake=None, circ=None,
                                   wake_fac=0.25):
         """Update strengths for unsteady calculation
 
@@ -128,16 +128,17 @@ class BoundVortexPanels(LumpedVortex):
 
         Parameters
         ----------
-        wake : wake panel object
-        Uinfty : array_like, shape (2,)
-            Farfield fluid velocity
         dt : float
             Timestep
-        circ : float (optional)
+        Uinfty : array_like, optional
+            Farfield fluid velocity (default (1,0))
+        wake : wake panel object, optional
+            Induces velocities on the body (default None)
+        circ : float, optional
             Total bound circulation, for enforcing Kelvin's circulation theorem.
             If None (default), obtain the total circulation from the wake,
             assuming overall circulation (body + wake) is zero
-        wake_fac : float (optional)
+        wake_fac : float, optional
             New wake vortex is placed a distance wake_fac * Uinfty * dt from
             trailing edge (see Katz & Plotkin, p390).
         """
