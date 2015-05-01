@@ -9,16 +9,17 @@ class Vortices(object):
         if positions is None:
             self._positions = None
         else:
-            self._positions = np.array(positions, ndmin=2)
+            self._positions = np.array(positions, ndmin=2, dtype=np.float64)
 
         self._circulation = 0
         if strengths is None:
             if positions is None:
                 self._strengths = None
             else:
-                self._strengths = np.zeros(self._positions.shape[0])
+                self._strengths = np.zeros(self._positions.shape[0],
+                                           dtype=np.float64)
         else:
-            self._strengths = np.array(strengths, ndmin=1)
+            self._strengths = np.array(strengths, ndmin=1, dtype=np.float64)
             self._circulation = np.sum(self._strengths)
 
     @property
