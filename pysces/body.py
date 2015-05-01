@@ -12,7 +12,7 @@ class Body(object):
 
         Parameters
         ----------
-        points : 2d array, shape (2,n)
+        points : 2d array, shape (n,2)
             Array of points defining the boundary of the body
             For a closed body, the boundary curve should be positively oriented
             (counter-clockwise around outside of body), starting from trailing
@@ -44,14 +44,14 @@ class Body(object):
 def cylinder(radius, num_points):
     """Return a circular Body with the given radius and number of points"""
     th = np.linspace(0, 2 * np.pi, num_points)
-    points = radius * np.vstack([np.cos(th), np.sin(th)])
+    points = radius * np.array([np.cos(th), np.sin(th)]).T
     return Body(points)
 
 def flat_plate(num_points):
     """Return a flat plate with the given number of points"""
     x = np.linspace(1, 0, num_points)
     y = np.zeros_like(x)
-    return Body(np.vstack([x, y]))
+    return Body(np.array([x, y]).T)
 
 def naca_airfoil(code, num_points, zero_thick_te=False, uniform=False):
     """Return a NACA 4-digit series airfoil"""
@@ -87,7 +87,7 @@ def naca_airfoil(code, num_points, zero_thick_te=False, uniform=False):
     x = np.hstack([x[-1:0:-1], x])
     y = np.hstack([y_camber[-1:0:-1] + y_thick[-1:0:-1],
                    y_camber - y_thick])
-    return Body(np.vstack([x, y]))
+    return Body(np.array([x, y]).T)
 
 
 class TransformedBody(object):

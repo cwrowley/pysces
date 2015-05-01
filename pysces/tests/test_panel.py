@@ -11,7 +11,7 @@ class TestPanel(unittest.TestCase):
         body = Body(points)
         body_panels = BoundVortexPanels(body)
         body_panels.update_strengths()
-        xvort, gam = body_panels.vortices
+        gam = body_panels.vortices.strengths
         self.assertEqual(gam, 0)
 
     def test_single_panel_normal(self):
@@ -21,7 +21,7 @@ class TestPanel(unittest.TestCase):
         body = Body(points)
         body_panels = BoundVortexPanels(body)
         body_panels.update_strengths()
-        xvort, gam = body_panels.vortices
+        gam = body_panels.vortices.strengths
         self.assertEqual(gam, np.pi)
 
     def check_shed_vortex(self, body, wake_fac):
@@ -29,7 +29,7 @@ class TestPanel(unittest.TestCase):
         Uinfty = (1,0)
         dt = 1
         panels.update_strengths_unsteady(dt, Uinfty, None, wake_fac=wake_fac)
-        _, gam = panels.vortices
+        gam = panels.vortices.strengths
         x_shed, gam_shed = panels.get_newly_shed()
         gam_sum = np.sum(gam)
         self.assertAlmostEqual(gam_shed, -gam_sum)
@@ -47,3 +47,6 @@ class TestPanel(unittest.TestCase):
 
     def test_regularization(self):
         pass
+
+if __name__ == "__main__":
+    unittest.main()

@@ -30,6 +30,10 @@ class Vortices(object):
     def strengths(self):
         return self._strengths
 
+    @strengths.setter
+    def strengths(self, value):
+        self._strengths = np.array(value, ndmin=1, dtype=np.float64)
+
     @property
     def circulation(self):
         return self._circulation
@@ -96,8 +100,7 @@ class Vortices(object):
         if motion is None:
             positions = self._positions
         else:
-            # TODO: change RigidMotion so that it acts on row vectors
-            positions = motion.map_position(self._positions.T).T
+            positions = motion.map_position(self._positions)
         x = np.array(x)
         vel = np.zeros_like(x, dtype=np.float64)
         for xvort, gam in zip(positions, self._strengths):
@@ -130,3 +133,8 @@ class Vortices(object):
         if Uinfty.any():
             vel += Uinfty
         self._positions += vel * dt
+
+    # def reset(self):
+    #     self._positions = None
+    #     self._strengths = None
+    #     self.

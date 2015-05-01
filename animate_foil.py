@@ -11,14 +11,15 @@ airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
 
 Uinfty = (1,0)
 dt = 0.05
-flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, FreeVortexParticles)
+Vortices.core_radius = dt
+flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, Vortices)
 
 fig, ax = plt.subplots()
 ax.axis('equal')
 ax.axis([-1,5,-2,2])
 ax.grid(True)
 q = airfoil.get_points()
-line, = ax.plot(q[0], q[1], '-k')
+line, = ax.plot(q[:,0], q[:,1], '-k')
 pts, = ax.plot(0,0,'ro')
 
 def gen_points():
@@ -27,12 +28,12 @@ def gen_points():
     dt = 0.02
     for i in range(num_steps):
         flow.advance()
-        yield airfoil.get_points(), flow.wake_panels.vortices
+        yield airfoil.get_points(), flow.wake_panels.positions
 
 def redraw(data):
-    q, (xvort, gam) = data
-    line.set_data(q[0], q[1])
-    pts.set_data(xvort[0], xvort[1])
+    q, xvort = data
+    line.set_data(q[:,0], q[:,1])
+    pts.set_data(xvort[:,0], xvort[:,1])
 
 movie = animation.FuncAnimation(fig, redraw, gen_points, interval=50, repeat_delay=0)
 plt.show()

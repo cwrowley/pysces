@@ -102,14 +102,15 @@ class RigidMotion(object):
             q -> R . q + x
         """
         if self._theta:
-            q_new = np.dot(self._R, q)
+            q_new = np.dot(q, np.transpose(self._R))
         else:
             q_new = np.array(q, copy=True)
         if self._x.any():
-            if q.ndim == 1:
-                q_new += self._x
-            else:
-                q_new += self._x[:, np.newaxis]
+            q_new += self._x
+            # if q.ndim == 1:
+                # q_new += self._x
+            # else:
+                # q_new += self._x[:, np.newaxis]
         return q_new
 
     def map_vector(self, qdot):
@@ -121,7 +122,7 @@ class RigidMotion(object):
             qdot -> R . qdot
         """
         if self._theta:
-            return np.dot(self._R, qdot)
+            return np.dot(qdot, np.transpose(self._R))
         else:
             return np.array(qdot, copy=True)
 
@@ -133,12 +134,13 @@ class RigidMotion(object):
         """
         qdot_new = np.zeros_like(q)
         if self._thetadot:
-            qdot_new += np.dot(self._Rdot, q)
+            qdot_new += np.dot(q, np.transpose(self._Rdot))
         if self._theta and qdot is not None and qdot.any():
-            qdot_new += np.dot(self._R, qdot)
+            qdot_new += np.dot(qdot, np.transpose(self._R))
         if self._xdot.any():
-            if q.ndim == 1:
-                qdot_new += self._xdot
-            else:
-                qdot_new += self._xdot[:, np.newaxis]
+            qdot_new += self._xdot
+            # if q.ndim == 1:
+                # qdot_new += self._xdot
+            # else:
+                # qdot_new += self._xdot[:, np.newaxis]
         return qdot_new

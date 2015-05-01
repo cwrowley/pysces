@@ -10,11 +10,12 @@ def compute_gam(body):
     body = TransformedBody(body, angle=alpha_deg, displacement=(1,2))
     panels = BoundVortexPanels(body)
     panels.update_strengths()
-    xvort, gam = panels.vortices
+    xvort, gam = panels.vortices.positions, panels.vortices.strengths
     q = body.get_points()
-    ds = np.linalg.norm(np.diff(q), axis=0)
+    ds = np.linalg.norm(np.diff(q, axis=0), axis=1)
+    # import pdb; pdb.set_trace()
     dgam = gam / ds
-    s = np.sqrt(xvort[0]**2 + xvort[1]**2)
+    s = np.sqrt(xvort[:,0]**2 + xvort[:,1]**2)
     return s, dgam
 
 num_points = 32

@@ -55,12 +55,12 @@ class TestRigidMotion(unittest.TestCase):
 
     def test_map_position(self):
         rot = RigidMotion(np.pi/2, (1,2))
-        x = np.array((13, 42))
+        x = (13, 42)
         y = (-41, 15)
         np.testing.assert_array_almost_equal(rot.map_position(x), y)
 
-        xarr = np.array([[13,13],[42,42]])
-        yarr = np.array([[-41,-41],[15,15]])
+        xarr = np.array([x,x])
+        yarr = np.array([y,y])
         np.testing.assert_array_almost_equal(rot.map_position(xarr), yarr)
 
     def test_map_velocity_inplace(self):

@@ -9,17 +9,17 @@ num_steps = 20
 Uinfty = (1,0)
 dt = 0.05
 
-flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, FreeVortexParticles)
+flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, Vortices)
 
 for i in range(1,num_steps):
     flow.advance()
     # lift, drag = compute_forces(flow.body_panels, flow.wake_panels)
     # print("Time %.1f: Lift = %.3f, Drag = %.3f" % (flow.time, lift, drag))
 
-vort, gv = flow.wake_panels.vortices
+vort = flow.wake_panels.positions
 q = airfoil.get_points()
-plt.plot(q[0], q[1], 'k-')
-plt.plot(vort[0], vort[1], 'ro')
+plt.plot(q[:,0], q[:,1], 'k-')
+plt.plot(vort[:,0], vort[:,1], 'ro')
 plt.axis('equal')
 plt.grid(True)
 plt.show()
