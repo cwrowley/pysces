@@ -14,7 +14,7 @@ body_panels.update_strengths()
 gam = body_panels.vortices.strengths
 xc = body_panels.collocation_pts
 Uinfty = np.array((1,0))
-vel = body_panels.vortices.induced_velocity(xc)
+vel = body_panels.induced_velocity(xc)
 vel_dot_n = np.sum(vel * body_panels.normals, 0)
 print("gam:" + str(gam))
 print("vel: " + str(vel))

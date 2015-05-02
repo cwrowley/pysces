@@ -159,6 +159,9 @@ class BoundVortexPanels(object):
             x_shed_inertial = np.array(self._x_shed, copy=True)
         return x_shed_inertial, self._gam_shed
 
+    def induced_velocity(self, x, motion=None):
+        return self._vortices.induced_velocity(x, motion)
+
     @property
     def vortices(self):
         return self._vortices

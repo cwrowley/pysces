@@ -1,17 +1,17 @@
 """A module to easily set up and manage a simulation"""
+from .vortex import Vortices
 
 __all__ = ['Simulation']
 
 class Simulation(object):
     """Set up and run a boundary element simulation"""
 
-    def __init__(self, body, Uinfty, dt, body_cls, wake_cls):
+    def __init__(self, body, Uinfty, dt, body_cls):
         """Initialize a simulation"""
         self._body = body
         self._Uinfty = Uinfty
         self._dt = dt
-        self._body_panels = body_cls(body)
-        self._wake = wake_cls()
+        self._bound = body_cls(body)
         self.initialize()
 
     def initialize(self):
@@ -24,9 +24,9 @@ class Simulation(object):
         """
         self._time = 0
         self._body.time = 0
-        # self._wake.reset()
-        self._body_panels.update_strengths_unsteady(self._dt, self._Uinfty)
-        self._wake.append(*self._body_panels.get_newly_shed())
+        self._wake = Vortices()
+        self._bound.update_strengths_unsteady(self._dt, self._Uinfty)
+        self._wake.append(*self._bound.get_newly_shed())
 
     def advance(self, dt=None):
         """Advance the simulation for one timestep
@@ -36,11 +36,11 @@ class Simulation(object):
         """
         if not dt:
             dt = self._dt
-        self._wake.advect(dt, self._Uinfty, self._body_panels.vortices)
+        self._wake.advect(dt, self._Uinfty, self._bound)
         self._time += dt
         self._body.time = self._time
-        self._body_panels.update_strengths_unsteady(dt, self._Uinfty, self._wake)
-        self._wake.append(*self._body_panels.get_newly_shed())
+        self._bound.update_strengths_unsteady(dt, self._Uinfty, self._wake)
+        self._wake.append(*self._bound.get_newly_shed())
 
     @property
     def time(self):
@@ -48,11 +48,11 @@ class Simulation(object):
         return self._time
 
     @property
-    def body_panels(self):
+    def bound(self):
         """Body panels used in the simulation"""
-        return self._body_panels
+        return self._bound
 
     @property
-    def wake_panels(self):
-        """Wake panels used in the simulation"""
+    def wake(self):
+        """Wake vortices used in the simulation"""
         return self._wake

@@ -8,19 +8,16 @@ freq = 0.7
 airfoil = Pitching(airfoil, 10, freq, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
 
-# body_panels = SourceDoubletPanels(airfoil)
-# wake_panels = FreeVortexParticles()
-
 num_steps = 100
 Uinfty = (1,0)
 dt = 0.1
 
-flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, Vortices)
+flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels)
 
 for i in range(1,num_steps):
     flow.advance()
 
-vort = flow.wake_panels.positions
+vort = flow.wake.positions
 q = airfoil.get_points()
 plt.plot(q[:,0], q[:,1], 'k-')
 plt.plot(vort[:,0], vort[:,1], 'ro')

@@ -12,7 +12,7 @@ airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
 Uinfty = (1,0)
 dt = 0.05
 Vortices.core_radius = dt
-flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels, Vortices)
+flow = Simulation(airfoil, Uinfty, dt, BoundVortexPanels)
 
 fig, ax = plt.subplots()
 ax.axis('equal')
@@ -28,7 +28,7 @@ def gen_points():
     dt = 0.02
     for i in range(num_steps):
         flow.advance()
-        yield airfoil.get_points(), flow.wake_panels.positions
+        yield airfoil.get_points(), flow.wake.positions
 
 def redraw(data):
     q, xvort = data

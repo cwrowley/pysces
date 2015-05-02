@@ -44,18 +44,3 @@ plt.title('Comparison with thin airfoil theory, AoA = %.1f deg' % alpha_deg)
 plt.grid(True)
 plt.legend()
 plt.show()
-
-if False:
-    xc = body_panels.collocation_pts
-    vel = np.zeros((2,xc.shape[1]))
-    for xv, g in zip(xvort.T, gam):
-        vel += body_panels.induced_velocity(xc, xv, g)
-    Uinfty = np.array((1,0))
-    vel += Uinfty[:,np.newaxis]
-    vel_dot_n = np.sum(vel * body_panels.normals, 0)
-
-    print(vel_dot_n)
-    plt.figure()
-    plt.plot(q[0], q[1], '-')
-    plt.quiver(xc[0], xc[1], vel[0], vel[1])
-    plt.axis('equal')
