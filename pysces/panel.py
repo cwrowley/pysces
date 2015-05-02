@@ -3,9 +3,9 @@ from __future__ import division
 import numpy as np
 from .vortex import Vortices
 
-__all__ = ['BoundVortexPanels', 'SourceDoubletPanels']
+__all__ = ['BoundVortices', 'BoundSourceDoublets']
 
-class BoundVortexPanels(object):
+class BoundVortices(object):
     """A class for bound vortex panels"""
 
     def __init__(self, body, Uinfty=(1,0)):
@@ -176,7 +176,7 @@ class BoundVortexPanels(object):
         return self._normals
 
 
-class SourceDoubletPanels(object):
+class BoundSourceDoublets(object):
     def __init__(self, body):
         self._body = body
         self.panels = body.get_points()

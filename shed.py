@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 body = naca_airfoil("0012", 16)
 body = flat_plate(16)
 body = TransformedBody(body, angle=10)
-panels = BoundVortexPanels(body)
+panels = BoundVortices(body)
 Uinfty = (1,0)
 dt = 1
 panels.update_strengths_unsteady(dt, Uinfty)

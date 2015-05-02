@@ -9,7 +9,7 @@ class TestPanel(unittest.TestCase):
         y = [0, 0]
         points = np.vstack([x, y])
         body = Body(points)
-        body_panels = BoundVortexPanels(body)
+        body_panels = BoundVortices(body)
         body_panels.update_strengths()
         gam = body_panels.vortices.strengths
         self.assertEqual(gam, 0)
@@ -19,13 +19,13 @@ class TestPanel(unittest.TestCase):
         y = [0, 1]
         points = np.vstack([x, y])
         body = Body(points)
-        body_panels = BoundVortexPanels(body)
+        body_panels = BoundVortices(body)
         body_panels.update_strengths()
         gam = body_panels.vortices.strengths
         self.assertEqual(gam, np.pi)
 
     def check_shed_vortex(self, body, wake_fac):
-        panels = BoundVortexPanels(body)
+        panels = BoundVortices(body)
         Uinfty = (1,0)
         dt = 1
         panels.update_strengths_unsteady(dt, Uinfty, None, wake_fac=wake_fac)

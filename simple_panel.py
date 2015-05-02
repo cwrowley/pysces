@@ -9,7 +9,7 @@ x = [2,1,0]
 y = [0,0,0]
 points = np.array([x, y]).T
 body = Body(points)
-body_panels = BoundVortexPanels(body)
+body_panels = BoundVortices(body)
 body_panels.update_strengths()
 gam = body_panels.vortices.strengths
 xc = body_panels.collocation_pts

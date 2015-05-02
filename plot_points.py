@@ -12,7 +12,7 @@ body = TransformedBody(body, angle=10)
 # body = flat_plate(2)
 # body = TransformedBody(body, angle=10)
 
-body_panels = BoundVortexPanels(body)
+body_panels = BoundVortices(body)
 
 vort = body_panels.vortices.positions
 coll = body_panels.collocation_pts

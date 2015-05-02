@@ -1,7 +1,7 @@
 import unittest
 from pysces.simulation import *
 from pysces.body import flat_plate
-from pysces.panel import BoundVortexPanels
+from pysces.panel import BoundVortices
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -10,7 +10,7 @@ class TestSimulation(unittest.TestCase):
         body = flat_plate(20)
         Uinfty = (1,0)
         dt = 0.1
-        flow = Simulation(body, Uinfty, dt, BoundVortexPanels)
+        flow = Simulation(body, Uinfty, dt, BoundVortices)
         self.assertEqual(flow.time, 0)
         self.assertEqual(len(flow.wake), 1)
         vort = flow.bound.vortices
