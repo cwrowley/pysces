@@ -117,7 +117,7 @@ class BoundVortexPanels(object):
         rhs = np.hstack([rhs0, circ])
 
         gam = np.linalg.solve(A, rhs)
-        self._gam = gam[:-1]
+        self._vortices.strengths = gam[:-1]
         self._x_shed = x_shed
         self._gam_shed = gam[-1]
 
