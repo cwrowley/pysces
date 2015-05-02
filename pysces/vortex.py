@@ -89,10 +89,8 @@ class Vortices(object):
         rsq = np.maximum(np.sum(r * r, 1), self.core_radius**2)
         # alternative regularization (Krasny, Eldredge)
         # rsq = np.sum(r * r, 1) + self.core_radius**2
-        vel = np.array(r[:,[1,0]], copy=True)
+        vel = np.transpose(np.array([r[:,1], -r[:,0]]))
         vel = gam / (2 * np.pi) * vel / rsq[:,np.newaxis]
-        vel[:,1] *= -1
-        # print(vel)
         return np.squeeze(vel)
 
     def induced_velocity(self, x, motion=None):
