@@ -12,7 +12,7 @@ airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
 Uinfty = (1,0)
 dt = 0.05
 Vortices.core_radius = dt
-flow = Simulation(airfoil, Uinfty, dt, BoundVortices)
+flow = ExplicitEuler(airfoil, Uinfty, dt, BoundVortices)
 
 fig, ax = plt.subplots()
 ax.axis('equal')

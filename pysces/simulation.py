@@ -1,15 +1,16 @@
 """A module to easily set up and manage a simulation"""
+import numpy as np
 from .vortex import Vortices
 
-__all__ = ['Simulation']
+__all__ = ['ExplicitEuler']
 
-class Simulation(object):
+class ExplicitEuler(object):
     """Set up and run a boundary element simulation"""
 
     def __init__(self, body, Uinfty, dt, body_cls):
         """Initialize a simulation"""
         self._body = body
-        self._Uinfty = Uinfty
+        self._Uinfty = np.array(Uinfty)
         self._dt = dt
         self._bound = body_cls(body)
         self.initialize()
@@ -36,7 +37,11 @@ class Simulation(object):
         """
         if not dt:
             dt = self._dt
-        self._wake.advect(dt, self._Uinfty, self._bound)
+        pos = self._wake.positions
+        vel = self._wake.induced_velocity(pos)
+        vel += self._bound.induced_velocity(pos)
+        vel += self._Uinfty
+        self._wake.positions += vel * dt
         self._time += dt
         self._body.time = self._time
         self._bound.update_strengths_unsteady(dt, self._Uinfty, self._wake)

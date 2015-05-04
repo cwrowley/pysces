@@ -10,7 +10,7 @@ class TestSimulation(unittest.TestCase):
         body = flat_plate(20)
         Uinfty = (1,0)
         dt = 0.1
-        flow = Simulation(body, Uinfty, dt, BoundVortices)
+        flow = ExplicitEuler(body, Uinfty, dt, BoundVortices)
         self.assertEqual(flow.time, 0)
         self.assertEqual(len(flow.wake), 1)
         vort = flow.bound.vortices

@@ -26,13 +26,19 @@ class Vortices(object):
     def positions(self):
         return self._positions
 
+    @positions.setter
+    def positions(self, value):
+        self._positions = np.array(value, dtype=np.float64)
+
     @property
     def strengths(self):
         return self._strengths
 
     @strengths.setter
     def strengths(self, value):
-        self._strengths = np.array(value, ndmin=1, dtype=np.float64)
+        strengths = np.array(value, ndmin=1, dtype=np.float64)
+        self._strengths = strengths
+        self._circulation = np.sum(strengths)
 
     @property
     def circulation(self):
@@ -131,8 +137,3 @@ class Vortices(object):
         if Uinfty.any():
             vel += Uinfty
         self._positions += vel * dt
-
-    # def reset(self):
-    #     self._positions = None
-    #     self._strengths = None
-    #     self.

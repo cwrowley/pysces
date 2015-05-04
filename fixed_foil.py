@@ -9,7 +9,7 @@ num_steps = 20
 Uinfty = (1,0)
 dt = 0.05
 
-flow = Simulation(airfoil, Uinfty, dt, BoundVortices)
+flow = ExplicitEuler(airfoil, Uinfty, dt, BoundVortices)
 
 for i in range(1,num_steps):
     flow.advance()
