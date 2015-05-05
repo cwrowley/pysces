@@ -109,21 +109,21 @@ class TestVortex(unittest.TestCase):
         x = (3,0)
         gam = 2 * np.pi
         vel = Vortices().induced_velocity_single(x, v, gam)
-        assert_array_equal(vel, (0,-1))
+        assert_array_equal(vel, (0,1))
 
     def test_induced_velocity_single_array(self):
         v = (0,0)
         x = np.array([(1,0), (2,0), (3,0)])
         gam = 2 * np.pi
         vel = Vortices().induced_velocity_single(x, v, gam)
-        vel_expected = np.array([(0, -1), (0, -1./2), (0, -1./3)])
+        vel_expected = np.array([(0, 1), (0, 1./2), (0, 1./3)])
         assert_array_equal(vel, vel_expected)
 
     def test_induced_velocity_tuple(self):
         v1 = (-1,0)
         v2 = (1,0)
-        g1 = -2 * np.pi
-        g2 = 2 * np.pi
+        g1 = 2 * np.pi
+        g2 = -2 * np.pi
         vort = Vortices([v1, v2], [g1, g2])
         x = (0,0)
         vel = vort.induced_velocity(x)
@@ -133,8 +133,8 @@ class TestVortex(unittest.TestCase):
     def test_induced_velocity_array(self):
         v1 = (-1,0)
         v2 = (1,0)
-        g1 = -2 * np.pi
-        g2 = 2 * np.pi
+        g1 = 2 * np.pi
+        g2 = -2 * np.pi
         vort = Vortices([v1, v2], [g1, g2])
         x = np.array([(0,-1), (0,0), (0,1)])
         vel = vort.induced_velocity(x)
@@ -147,7 +147,7 @@ class TestVortex(unittest.TestCase):
         motion = RigidMotion(np.pi/2, (0,0))
         x = (0,0)
         vel = vort.induced_velocity(x, motion=motion)
-        vel_expected = (-1,0)
+        vel_expected = (1,0)
         assert_array_almost_equal(vel, vel_expected)
 
     def test_regularization(self):
@@ -157,7 +157,7 @@ class TestVortex(unittest.TestCase):
         x0 = np.array((eps,0))
         x = np.array([0.5 * x0, x0, 2 * x0])
         vel = vort.induced_velocity(x)
-        vel_expected = np.array([(0,-0.5/eps), (0,-1./eps), (0,-0.5/eps)])
+        vel_expected = np.array([(0,0.5/eps), (0,1./eps), (0,0.5/eps)])
         assert_array_equal(vel, vel_expected)
 
     def test_advect_1(self):
@@ -170,7 +170,7 @@ class TestVortex(unittest.TestCase):
 
     def test_advect_2(self):
         pos = [(-1,0), (1,0)]
-        gam = 2 * np.pi * np.array([-1, 1])
+        gam = 2 * np.pi * np.array([1, -1])
         vort = Vortices(pos, gam)
         dt = 0.1
         vort.advect(dt)
@@ -181,5 +181,5 @@ class TestVortex(unittest.TestCase):
         vort2 = Vortices((1,0), 2 * np.pi)
         dt = 0.1
         vort1.advect(dt, other=vort2)
-        assert_array_equal(vort1.positions, [(0, dt)])
+        assert_array_equal(vort1.positions, [(0, -dt)])
         assert_array_equal(vort2.positions, [(1, 0)])

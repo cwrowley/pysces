@@ -83,19 +83,19 @@ class Vortices(object):
         -----
         Induced velocity is
 
-        .. math:: u_\theta = -\frac{\Gamma}{2 \pi r}
+        .. math:: u_\theta = \frac{\Gamma}{2 \pi r}
 
         where r is the distance between the point and the vortex.  If this
         distance is less than :class:`core_radius` :math:`r_0`, the velocity is
         regularized as solid-body rotation, with
 
-        .. math:: u_\theta = -\frac{\Gamma r}{2\pi r_0^2}
+        .. math:: u_\theta = \frac{\Gamma r}{2\pi r_0^2}
         """
         r = np.array(x, ndmin=2) - np.array(xvort)
         rsq = np.maximum(np.sum(r * r, 1), self.core_radius**2)
         # alternative regularization (Krasny, Eldredge)
         # rsq = np.sum(r * r, 1) + self.core_radius**2
-        vel = np.transpose(np.array([r[:,1], -r[:,0]]))
+        vel = np.transpose(np.array([-r[:,1], r[:,0]]))
         vel = gam / (2 * np.pi) * vel / rsq[:,np.newaxis]
         return np.squeeze(vel)
 

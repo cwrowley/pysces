@@ -22,7 +22,7 @@ class TestPanel(unittest.TestCase):
         body_panels = BoundVortices(body)
         body_panels.update_strengths()
         gam = body_panels.vortices.strengths
-        self.assertEqual(gam, np.pi)
+        self.assertEqual(gam, -np.pi)
 
     def check_shed_vortex(self, body, wake_fac):
         panels = BoundVortices(body)
