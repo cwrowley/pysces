@@ -1,4 +1,5 @@
 import unittest
+import sys
 from pysces.timestepper import *
 from pysces.body import flat_plate
 from pysces.panel import BoundVortices
@@ -53,7 +54,11 @@ class TestTimestepper(unittest.TestCase):
             stepper.advance()
         q = stepper.wake.positions
         err = np.sum((q - exact) * (q - exact))
-        self.assertLess(err, tol)
+        if sys.version_info >= (2, 7):
+            self.assertLess(err, tol)
+        else:
+            # assertLess not available in Python 2.6
+            self.assertTrue(err < tol)
 
     def test_vortex_pair_euler(self):
         tol = 0.07
