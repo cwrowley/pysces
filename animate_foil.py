@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 airfoil = naca_airfoil("0006", 20) # NACA 0012 airfoil with 20 points per side
+# airfoil = flat_plate(20)
 airfoil = TransformedBody(airfoil, displacement=(-0.25, 0))
 freq = 0.3 * 2*np.pi
 airfoil = Pitching(airfoil, 20, freq, phase=90)
@@ -12,8 +13,8 @@ airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
 Uinfty = (1,0)
 dt = 0.05
 Vortices.core_radius = dt
-# flow = ExplicitEuler(airfoil, Uinfty, dt, BoundVortices)
-flow = RungeKutta2(airfoil, Uinfty, dt, BoundVortices)
+# flow = ExplicitEuler(dt, Uinfty, airfoil, BoundVortices)
+flow = RungeKutta2(dt, Uinfty, airfoil, BoundVortices)
 
 fig, ax = plt.subplots()
 ax.axis('equal')

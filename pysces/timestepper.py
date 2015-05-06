@@ -7,15 +7,20 @@ __all__ = ['ExplicitEuler', 'RungeKutta2', 'RungeKutta4']
 class Timestepper(object):
     """Base class for timesteppers for unsteady boundary element simulation"""
 
-    def __init__(self, body, Uinfty, dt, body_cls):
+    def __init__(self, dt, Uinfty=(1,0), body=None, body_cls=None, wake=None):
         """Initialize a simulation"""
-        self._body = body
-        self._Uinfty = np.array(Uinfty)
         self._dt = dt
-        self._bound = body_cls(body)
-        self.initialize()
+        self._Uinfty = np.array(Uinfty)
+        self._body = body
+        if body is None:
+            self._has_body = False
+            self._bound = None
+        else:
+            self._has_body = True
+            self._bound = body_cls(body)
+        self.initialize(wake)
 
-    def initialize(self):
+    def initialize(self, wake=None):
         """Initialize a timestepper
 
         Solve for panel strengths so that surface boundary conditions are
@@ -24,10 +29,14 @@ class Timestepper(object):
 
         """
         self._time = 0
-        self._body.time = 0
-        self._wake = Vortices()
-        self._bound.update_strengths_unsteady(self._dt, self._Uinfty)
-        self._wake.append(*self._bound.get_newly_shed())
+        if wake is None:
+            self._wake = Vortices()
+        else:
+            self._wake = Vortices(wake.positions, wake.strengths)
+        if self._has_body:
+            self._body.time = 0
+            self._bound.update_strengths_unsteady(self._dt, self._Uinfty)
+            self._wake.append(*self._bound.get_newly_shed())
 
     @property
     def time(self):
@@ -81,14 +90,17 @@ class Timestepper(object):
             shed = None
         else:
             self._wake.positions = pos
-            self._body.time = self._time + dt
-            self._bound.update_strengths_unsteady(dt, self._Uinfty)
-            shed = Vortices(*self._bound.get_newly_shed())
+            if self._has_body:
+                # update body position and strengths of surface elements
+                self._body.time = self._time + dt
+                self._bound.update_strengths_unsteady(dt, self._Uinfty)
+                shed = Vortices(*self._bound.get_newly_shed())
         vel = self._wake.induced_velocity(pos)
-        vel += self._bound.induced_velocity(pos)
-        if shed:
-            vel += shed.induced_velocity(pos)
         vel += self._Uinfty
+        if self._has_body:
+            vel += self._bound.induced_velocity(pos)
+            if shed:
+                vel += shed.induced_velocity(pos)
         return vel
 
     def _update_flow(self, wake_pos, dt):
@@ -110,9 +122,10 @@ class Timestepper(object):
         """
         self._wake.positions = wake_pos
         self._time += dt
-        self._body.time = self._time
-        self._bound.update_strengths_unsteady(dt, self._Uinfty, self._wake)
-        self._wake.append(*self._bound.get_newly_shed())
+        if self._has_body:
+            self._body.time = self._time
+            self._bound.update_strengths_unsteady(dt, self._Uinfty, self._wake)
+            self._wake.append(*self._bound.get_newly_shed())
 
 
 class ExplicitEuler(Timestepper):
