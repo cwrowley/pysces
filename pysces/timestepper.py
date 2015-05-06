@@ -38,6 +38,13 @@ class Timestepper(object):
             self._bound.update_strengths_unsteady(self._dt, self._Uinfty)
             self._wake.append(*self._bound.get_newly_shed())
 
+    def advance(self, dt=None):
+        """Advance the simulation for one timestep"""
+        if not dt:
+            dt = self._dt
+        x = self._wake.positions
+        self._advance(x, dt)    # defer to subclass
+
     @property
     def time(self):
         """Current simulation time"""
@@ -85,20 +92,22 @@ class Timestepper(object):
         satisfy the no-flow-through boundary condition.
 
         """
+        wake = self._wake
+        bound = self._bound
         if pos is None:
-            pos = self._wake.positions
+            pos = wake.positions
             shed = None
         else:
-            self._wake.positions = pos
+            wake.positions = pos
             if self._has_body:
                 # update body position and strengths of surface elements
                 self._body.time = self._time + dt
-                self._bound.update_strengths_unsteady(dt, self._Uinfty, self._wake)
-                shed = Vortices(*self._bound.get_newly_shed())
-        vel = self._wake.induced_velocity(pos)
+                bound.update_strengths_unsteady(dt, self._Uinfty, wake)
+                shed = Vortices(*bound.get_newly_shed())
+        vel = wake.induced_velocity(pos)
         vel += self._Uinfty
         if self._has_body:
-            vel += self._bound.induced_velocity(pos)
+            vel += bound.induced_velocity(pos)
             if shed:
                 vel += shed.induced_velocity(pos)
         return vel
@@ -131,21 +140,14 @@ class Timestepper(object):
 class ExplicitEuler(Timestepper):
     """Timestepper using the explicit Euler method"""
 
-    def advance(self, dt=None):
-        """Advance the simulation for one timestep"""
-        if not dt:
-            dt = self._dt
+    def _advance(self, x, dt):
         vel = self._wake_velocity()
-        self._update_flow(self.wake.positions + vel * dt, dt)
+        self._update_flow(x + vel * dt, dt)
 
 class RungeKutta2(Timestepper):
     """Timestepper using 2nd-order Runge Kutta"""
 
-    def advance(self, dt=None):
-        """Advance the solution for one timestep"""
-        if not dt:
-            dt = self._dt
-        x = self.wake.positions
+    def _advance(self, x, dt):
         k1 = self._wake_velocity()
         k2 = self._wake_velocity(x + dt/2 * k1, dt/2)
         self._update_flow(x + dt * k2, dt)
@@ -153,11 +155,7 @@ class RungeKutta2(Timestepper):
 class RungeKutta4(Timestepper):
     """Timestepper using 4th-order Runge Kutta"""
 
-    def advance(self, dt=None):
-        """Standard rk4"""
-        if not dt:
-            dt = self._dt
-        x = self.wake.positions
+    def _advance(self, x, dt):
         k1 = self._wake_velocity()
         k2 = self._wake_velocity(x + dt/2 * k1, dt/2)
         k3 = self._wake_velocity(x + dt/2 * k2, dt/2)
