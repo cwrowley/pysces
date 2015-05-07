@@ -22,7 +22,9 @@ ax.axis([-1,5,-2,2])
 ax.grid(True)
 q = airfoil.get_points()
 line, = ax.plot(q[:,0], q[:,1], '-k')
-pts, = ax.plot(0,0,'ro')
+maxval = dt
+pts = ax.scatter(0, 0, c=0,
+                 cmap='bwr', vmin=-maxval, vmax=maxval, edgecolors='none')
 
 def gen_points():
     flow.initialize()
@@ -30,12 +32,13 @@ def gen_points():
     dt = 0.02
     for i in range(num_steps):
         flow.advance()
-        yield airfoil.get_points(), flow.wake.positions
+        yield airfoil.get_points(), flow.wake.positions, flow.wake.strengths
 
 def redraw(data):
-    q, xvort = data
+    q, xvort, gam = data
     line.set_data(q[:,0], q[:,1])
-    pts.set_data(xvort[:,0], xvort[:,1])
+    pts.set_offsets(np.array([xvort[:,0], xvort[:,1]]).T)
+    pts.set_array(gam)
 
-movie = animation.FuncAnimation(fig, redraw, gen_points, interval=50, repeat_delay=0)
+movie = animation.FuncAnimation(fig, redraw, gen_points, interval=50)
 plt.show()
