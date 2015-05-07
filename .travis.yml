@@ -17,12 +17,11 @@ before_install:
   - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip nose
   - source activate pyenv
   - conda info -a
-
-# Install packages
-install:
   - pip install coveralls
 
-# command to run tests
+install:
+  - python setup.py install
+
 script:
   - nosetests --with-cov --cover-package pysces
 
