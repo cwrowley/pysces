@@ -99,13 +99,16 @@ class Vortices(object):
         vel = gam / (2 * np.pi) * vel / rsq[:,np.newaxis]
         return np.squeeze(vel)
 
-    def induced_velocity(self, x, motion=None):
+    def induced_velocity(self, x=None, motion=None):
         """Compute the induced velocity at the given point(s)"""
         if motion is None:
             positions = self._positions
         else:
             positions = motion.map_position(self._positions)
-        x = np.array(x)
+        if x is None:
+            x = self._positions
+        else:
+            x = np.array(x)
         vel = np.zeros_like(x, dtype=np.float64)
         for xvort, gam in zip(positions, self._strengths):
             vel += self.induced_velocity_single(x, xvort, gam)

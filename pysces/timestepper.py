@@ -104,7 +104,7 @@ class Timestepper(object):
                 self._body.time = self._time + dt
                 bound.update_strengths_unsteady(dt, self._Uinfty, wake)
                 shed = Vortices(*bound.get_newly_shed())
-        vel = wake.induced_velocity(pos)
+        vel = wake.induced_velocity()
         vel += self._Uinfty
         if self._has_body:
             vel += bound.induced_velocity(pos)
