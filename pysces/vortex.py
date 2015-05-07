@@ -110,30 +110,3 @@ class Vortices(object):
         for xvort, gam in zip(positions, self._strengths):
             vel += self.induced_velocity_single(x, xvort, gam)
         return vel
-
-    def advect(self, dt, Uinfty=(0,0), other=None):
-        """Advect the vortex particles forward one step in time
-
-        Parameters
-        ----------
-        dt : float
-            Timestep
-        Uinfty : array_like, optional
-            Farfield velocity, default (0,0)
-        ither : Vortex object (optional)
-            Optional body also contributing to induced velocity of the particles
-
-        Notes
-        -----
-        An explicit Euler update is used, where the particle positions are
-        incremented by ``vel * dt``, where ``vel`` is the induced velocity
-
-        """
-        # explicit Euler update
-        vel = self.induced_velocity(self._positions)
-        if other:
-            vel += other.induced_velocity(self._positions)
-        Uinfty = np.array(Uinfty)
-        if Uinfty.any():
-            vel += Uinfty
-        self._positions += vel * dt
