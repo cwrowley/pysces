@@ -3,3 +3,4 @@ htmlcov
 *.pyc
 doc/_build
 doc/generated
+*.egg-info
