@@ -4,3 +4,4 @@ htmlcov
 doc/_build
 doc/generated
 *.egg-info
+*.prof
