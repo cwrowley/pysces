@@ -10,6 +10,7 @@ class BoundVortices(object):
 
     def __init__(self, body, Uinfty=(1,0)):
         self._body = body
+        self._time = 0
         self._update(Uinfty)
 
     def _update(self, Uinfty=(1,0)):
@@ -161,6 +162,15 @@ class BoundVortices(object):
 
     def induced_velocity(self, x):
         return self._vortices.induced_velocity(x, self._body.get_motion())
+
+    @property
+    def time(self):
+        return self._time
+
+    @time.setter
+    def time(self, value):
+        self._time = value
+        self._body.time = value
 
     @property
     def vortices(self):

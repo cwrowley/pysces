@@ -9,12 +9,13 @@ airfoil = TransformedBody(airfoil, displacement=(-0.25, 0))
 freq = 0.3 * 2*np.pi
 airfoil = Pitching(airfoil, 20, freq, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
+bound = BoundVortices(airfoil)
 
 Uinfty = (1,0)
 dt = 0.05
 Vortices.core_radius = dt
-# flow = ExplicitEuler(dt, Uinfty, airfoil, BoundVortices)
-flow = RungeKutta2(dt, Uinfty, airfoil, BoundVortices)
+# flow = ExplicitEuler(dt, Uinfty, bound)
+flow = RungeKutta2(dt, Uinfty, bound)
 
 fig, ax = plt.subplots()
 ax.axis('equal')

@@ -7,13 +7,14 @@ airfoil = TransformedBody(airfoil, displacement=(-0.25, 0))
 freq = 0.3 * 2 * np.pi
 airfoil = Pitching(airfoil, 10, freq, phase=90)
 airfoil = Heaving(airfoil, (0,0.2), freq, phase=0)
+bound = BoundVortices(airfoil)
 
 num_steps = 400
 Uinfty = (1,0)
 dt = 0.01
 Vortices.core_radius = dt
 
-flow = ExplicitEuler(dt, Uinfty, airfoil, BoundVortices)
+flow = ExplicitEuler(dt, Uinfty, bound)
 
 for i in range(1,num_steps):
     flow.advance()

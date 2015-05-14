@@ -8,31 +8,30 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 class TestTimestepper(unittest.TestCase):
-    def test_euler(self):
+    def check_timestepper(self, timestepper_cls):
         body = flat_plate(20)
+        bound = BoundVortices(body)
         Uinfty = (1,0)
         dt = 0.1
-        flow = ExplicitEuler(dt, Uinfty, body, BoundVortices)
+        flow = timestepper_cls(dt, Uinfty, bound)
         self.assertEqual(flow.time, 0)
         self.assertEqual(len(flow.wake), 1)
         vort = flow.bound.vortices
-        self.assertEqual(vort.circulation, -flow.wake.circulation)
+        wake = flow.wake
+        self.assertEqual(vort.circulation, -wake.circulation)
         flow.advance()
         self.assertEqual(flow.time, dt)
-        self.assertEqual(len(flow.wake), 2)
+        self.assertEqual(len(wake), 2)
+        self.assertEqual(vort.circulation, -wake.circulation)
+
+    def test_euler(self):
+        self.check_timestepper(ExplicitEuler)
+
+    def test_rk2(self):
+        self.check_timestepper(RungeKutta2)
 
     def test_rk4(self):
-        body = flat_plate(20)
-        Uinfty = (1,0)
-        dt = 0.1
-        flow = RungeKutta4(dt, Uinfty, body, BoundVortices)
-        self.assertEqual(flow.time, 0)
-        self.assertEqual(len(flow.wake), 1)
-        vort = flow.bound.vortices
-        self.assertEqual(vort.circulation, -flow.wake.circulation)
-        flow.advance()
-        self.assertEqual(flow.time, dt)
-        self.assertEqual(len(flow.wake), 2)
+        self.check_timestepper(RungeKutta4)
 
     def check_vortex_pair(self, cls, tol):
         # compare with exact solution for a pair of vortices:

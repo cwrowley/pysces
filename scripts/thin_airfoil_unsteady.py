@@ -19,13 +19,14 @@ num_points = 32
 angle = 2 # degrees
 body = flat_plate(num_points)
 body = TransformedBody(body, angle=angle)
+bound = BoundVortices(body)
 
 # unsteady simulation
 dt = 0.5
 Uinfty = (1,0)
 num_steps = 100
-stepper = ExplicitEuler(dt, Uinfty, body, BoundVortices)
-# stepper = RungeKutta2(dt, Uinfty, body, BoundVortices)
+# stepper = ExplicitEuler(dt, Uinfty, bound)
+stepper = RungeKutta2(dt, Uinfty, bound)
 
 for i in range(num_steps):
     stepper.advance()
