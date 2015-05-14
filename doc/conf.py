@@ -15,12 +15,18 @@
 import sys
 import os
 import re
+import shutil
 
 import mock
  
 MOCK_MODULES = ['numpy', 'numpy.linalg']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
+
+# clean out generated files if running on readthedocs
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
+    shutil.rmtree("generated")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
