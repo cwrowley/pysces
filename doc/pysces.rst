@@ -27,6 +27,6 @@ Panel methods
    :toctree: generated/
 
    Vortices
-   BoundVortexPanels
-   SourceDoubletPanels
+   BoundVortices
+   BoundSourceDoublets
 
