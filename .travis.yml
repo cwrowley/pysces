@@ -14,7 +14,7 @@ before_install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip nose
+  - conda create -n pyenv python=$TRAVIS_PYTHON_VERSION numpy coverage pip nose cython
   - source activate pyenv
   - conda info -a
   - pip install coveralls
