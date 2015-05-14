@@ -11,7 +11,8 @@ setup(
     license='BSD',
     packages=['pysces'],
     ext_modules = cythonize("pysces/vortex.pyx"),
-    install_requires=['numpy'],
+    install_requires=['numpy','cython'],
     tests_require=['nose'],
     test_suite='nose.collector',
+    zip_safe=False
 )
