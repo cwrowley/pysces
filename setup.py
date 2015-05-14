@@ -1,4 +1,5 @@
 from setuptools import setup
+from Cython.Build import cythonize
 
 setup(
     name='pysces',
@@ -9,6 +10,7 @@ setup(
     author_email='cwrowley@princeton.edu',
     license='BSD',
     packages=['pysces'],
+    ext_modules = cythonize("pysces/vortex.pyx"),
     install_requires=['numpy'],
     tests_require=['nose'],
     test_suite='nose.collector',

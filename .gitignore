@@ -5,3 +5,6 @@ doc/_build
 doc/generated
 *.egg-info
 *.prof
+build
+/pysces/vortex.c
+/pysces/vortex.so
