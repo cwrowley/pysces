@@ -26,8 +26,9 @@ for mod_name in MOCK_MODULES:
 # clean out generated files if running on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
-    print(os.getcwd())
-    # shutil.rmtree("generated")
+    print("Removing generated files")
+    if os.path.isdir("generated"):
+        shutil.rmtree("generated")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
