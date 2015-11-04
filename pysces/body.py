@@ -19,7 +19,7 @@ class Body(object):
             edge
         """
         self._time = 0
-        self._points = points
+        self._points = np.array(points, dtype="float64")
 
     @property
     def time(self):
@@ -150,7 +150,7 @@ class Heaving(TransformedBody):
     """
     def __init__(self, body, displacement, frequency, phase=0.):
         super(Heaving, self).__init__(body)
-        self._displacement = np.array(displacement)
+        self._displacement = np.array(displacement, dtype="float64")
         self._frequency = frequency
         self._phase = phase * np.pi / 180
 

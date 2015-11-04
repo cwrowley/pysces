@@ -8,9 +8,9 @@ class RigidMotion(object):
     def __init__(self, theta, x, thetadot=0, xdot=(0,0)):
         """angles are in radians"""
         self._theta = theta
-        self._x = np.array(x)
+        self._x = np.array(x, dtype="float64")
         self._thetadot = thetadot
-        self._xdot = np.array(xdot)
+        self._xdot = np.array(xdot, dtype="float64")
         self._update()
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class RigidMotion(object):
 
     @x.setter
     def x(self, value):
-        self._x = np.array(value)
+        self._x = np.array(value, dtype="float64")
 
     @property
     def thetadot(self):
@@ -132,7 +132,7 @@ class RigidMotion(object):
         If transformation is (R, x), then
             d/dt (R, x) q = Rdot q + R qdot + xdot
         """
-        qdot_new = np.zeros_like(q)
+        qdot_new = np.zeros_like(q, dtype="float64")
         if self._thetadot:
             qdot_new += np.dot(q, np.transpose(self._Rdot))
         if self._theta and qdot is not None and qdot.any():
