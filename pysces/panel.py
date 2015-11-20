@@ -1,6 +1,8 @@
 from __future__ import division
 
 import numpy as np
+import sys
+import matplotlib.pyplot as plt
 from .vortex import Vortices
 
 __all__ = ['BoundVortices', 'BoundSourceDoublets']
@@ -14,13 +16,15 @@ class BoundVortices(object):
         self._update(Uinfty)
 
     def _update(self, Uinfty=(1,0)):
-        # here, Uinfty is used solely to determine direction of panel, for
-        # placing colllocation points and vortex positions
+        # Uinfty is used here solely to determine direction of panel and for
+        # distributing bound vortices and collocation points
         q = self._body.get_points(body_frame=True)
         dq = np.diff(q, axis=0)
         self._numpanels = dq.shape[0]
+        self._tangents = dq / np.linalg.norm(dq, axis=1)[:,np.newaxis]
         self._normals = np.transpose(np.array([dq[:,1], -dq[:,0]]) /
                                      np.linalg.norm(dq, axis=1))
+
         q25 = q[:-1] + 0.25 * dq
         q75 = q[:-1] + 0.75 * dq
         # vortex positions at 1/4 chord of panel
@@ -37,7 +41,7 @@ class BoundVortices(object):
         if np.linalg.norm(q[0] - q[-1]) < 0.005:
             # closed body
             self._trailing_edge = 0.5 * (q[0] + q[-1])
-            wake_dir = -0.5 * (dq[0] - dq[-1])
+            wake_dir = dq[-1] - dq[0]
             self._wake_dir = wake_dir / np.linalg.norm(wake_dir)
         else:
             # thin airfoil
@@ -45,6 +49,15 @@ class BoundVortices(object):
             self._wake_dir = -dq[0] / np.linalg.norm(dq[0])
         self._vortices = Vortices(xvort)
         self._influence_matrix = None
+
+        # Uncomment the following lines to see the vortex and collocation
+        # points.
+        #plt.plot(q[:,0],q[:,1],'-k')
+        #plt.plot(xvort[:,0],xvort[:,1],'ro')
+        #plt.plot(self._xcoll[:,0],self._xcoll[:,1],'bs')
+        #plt.axis('equal')
+        #plt.legend(['body','vortices','collocation pts'])
+        #plt.show()
 
     def update_positions(self):
         # If non-rigid bodies are used, update panel positions here.
@@ -61,12 +74,24 @@ class BoundVortices(object):
             # time to recompute
             n = self._numpanels
             A = np.zeros((n, n))
-            for i, vort in enumerate(self._vortices):
+            for j, vort in enumerate(self._vortices):
                 vel = self._vortices.induced_velocity_single(self._xcoll,
                                                              vort[0], 1)
-                A[:, i] = np.sum(vel * self._normals, 1)
+                A[:, j] = np.sum(vel * self._normals, 1)
             self._influence_matrix = A
         return self._influence_matrix
+
+    @property
+    def num_panels(self):
+        return self._numpanels
+
+    @property
+    def tangents(self):
+        return self._tangents
+
+    @property
+    def normals(self):
+        return self._normals
 
     def update_strengths(self, Uinfty=(1,0)):
         """Update vortex strengths"""
@@ -124,6 +149,8 @@ class BoundVortices(object):
 
     def compute_rhs(self, Uinfty=(1,0), wake=None):
         # get collocation points and normals
+        # if a motion is present, use it to map the collocation points and 
+        # their normals from the body frame to the inertial frame.
         motion = self._body.get_motion()
         if motion:
             xcoll_inertial = motion.map_position(self._xcoll)

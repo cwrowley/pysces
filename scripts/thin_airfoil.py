@@ -3,9 +3,6 @@ import numpy as np
 from pysces import *
 import matplotlib.pyplot as plt
 
-alpha_deg = 2 # degrees
-alpha = alpha_deg * np.pi / 180
-
 def compute_gam(body):
     body = TransformedBody(body, angle=alpha_deg, displacement=(1,2))
     panels = BoundVortices(body)
@@ -17,6 +14,8 @@ def compute_gam(body):
     s = np.sqrt(xvort[:,0]**2 + xvort[:,1]**2)
     return s, dgam
 
+alpha_deg = 2 # degrees
+alpha = alpha_deg * np.pi / 180
 num_points = 32
 plate = flat_plate(num_points)
 airfoil = naca_airfoil("0001", num_points)

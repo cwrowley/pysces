@@ -25,6 +25,7 @@ for i in range(1,num_steps):
     plt.plot(q1[:,0], q1[:,1], 'ro')
     plt.plot(q2[:,0], q2[:,1], 'bo')
     plt.plot(q3[:,0], q3[:,1], 'go')
+
 plt.axis('equal')
 plt.grid(True)
 plt.show()

@@ -28,6 +28,7 @@ class Timestepper(object):
             self._wake = Vortices()
         else:
             self._wake = Vortices(wake.positions, wake.strengths)
+
         if self._has_body:
             self._bound.time = 0
             self._bound.update_strengths_unsteady(self._dt, self._Uinfty)

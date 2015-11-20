@@ -11,8 +11,8 @@ class Vortices(object):
         else:
             self._positions = np.array(positions, ndmin=2, dtype=np.float64)
 
-        self._circulation = 0
         if strengths is None:
+            self._circulation = 0
             if positions is None:
                 self._strengths = None
             else:
@@ -79,6 +79,9 @@ class Vortices(object):
         gam : float
             Strength of vortex
 
+        This method returns a vector of velocities at the points x induced
+        by a single vortex of strength gam located at xvort.
+
         Notes
         -----
         Induced velocity is
@@ -94,7 +97,7 @@ class Vortices(object):
         r = np.array(x, ndmin=2) - np.array(xvort)
         rsq = np.maximum(np.sum(r * r, 1), self.core_radius**2)
         # alternative regularization (Krasny, Eldredge)
-        # rsq = np.sum(r * r, 1) + self.core_radius**2
+        #rsq = np.sum(r * r, 1) + self.core_radius**2
         vel = np.transpose(np.array([-r[:,1], r[:,0]]))
         vel = gam / (2 * np.pi) * vel / rsq[:,np.newaxis]
         return np.squeeze(vel)

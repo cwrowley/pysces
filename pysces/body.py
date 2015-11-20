@@ -2,7 +2,8 @@ import numpy as np
 from .motion import RigidMotion
 
 __all__ = ['Body', 'TransformedBody', 'Pitching', 'Heaving',
-           'cylinder', 'flat_plate', 'naca_airfoil']
+           'cylinder', 'flat_plate', 'naca_airfoil', 'joukowski_foil',
+           'van_de_vooren_foil', 'karman_trefftz']
 
 class Body(object):
     """Base class for representing bodies
@@ -48,10 +49,77 @@ def cylinder(radius, num_points):
     return Body(points)
 
 def flat_plate(num_points):
-    """Return a flat plate with the given number of points"""
-    x = np.linspace(1, 0, num_points)
+    """
+    Return a flat plate with the given number of points.  In body coordinates
+    the plate runs from (0,0) to (1,0)."""
+    x = np.linspace(1, 0, num_points) # from 1 to 0 so trailing edge at index 0
     y = np.zeros_like(x)
     return Body(np.array([x, y]).T)
+
+def joukowski_foil(xcenter=-.1, ycenter=.1, a=1, numpoints=32):
+    """
+    Return a Joukowski foil centered with the trailing edge at (2a,0), and 
+    with a total of numpoints along the boundary.
+
+    (xcenter,ycenter) and a are the center and radius of the preimage circle.
+    Note that xcenter should be negative and small.  Its magnitude determines
+    the bluffness of the foil.  Meanwhile, ycenter should be small.  It
+    determines the magnitude of the camber; positive gives upward
+    camber, and negative gives downward camber.
+
+    (See sections 4.6 - 4.9 of Acheson.)"""
+    t = np.linspace(0,2*np.pi,numpoints)
+    r = np.sqrt((a-xcenter)**2+ycenter**2)
+    chi = xcenter + r*np.cos(t)
+    eta = ycenter + r*np.sin(t)
+    mag2 = chi*chi + eta*eta
+    x = chi*(1+a**2/mag2)
+    y = eta*(1-a**2/mag2)
+    return Body(np.array([x,y]).T)
+
+def karman_trefftz(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32):
+    """
+    Return a Karman-Trefftz foil.  This is a modified version of the Joukowski
+    foil but with a nonzero interior angle, rather than a cusp, at the trailing
+    edge.  The parameters xcenter, ycenter, a, and numpoints are the same as 
+    for joukowski_foil(), and angle_deg is the interior angle, in degrees, 
+    at the trailing edge.
+    
+    See https://en.wikipedia.org/wiki/Joukowsky_transform"""
+    angle_rad = angle_deg*np.pi/180
+    n = 2-angle_rad/np.pi
+    t = np.linspace(0,2*np.pi,numpoints)
+    ctr = xcenter + 1j*ycenter
+    r = np.linalg.norm(ctr-a)
+    zeta = ctr+r*np.exp(1j*t)
+    mag2 = np.linalg.norm(zeta)
+    z = n*((1+1/zeta)**n+(1-1/zeta)**n)/((1+1/zeta)**n-(1-1/zeta)**n)
+    x = [w.real for w in z]
+    y = [w.imag for w in z]
+    return Body(np.array([x,y]).T)
+
+def van_de_vooren_foil(semichord=1.0, thickness=0.15, angle_deg=5,
+numpoints=32):
+    """
+    Return a van de Vooren foil.
+
+    semichord = half the chord c, so c=2l
+    thickness = vertical thickness as a fraction (0 < thickness < 1) of 
+                the semichord
+    angle_deg = interior angle, in degrees, at the trailing edge
+    numpoints = number of points along the boundary
+
+    See section 6.6 of Katz and Plotkin, 2nd Ed.
+    """
+    k = 2-(angle_deg*np.pi/180)
+    a = 2*semichord*((1+thickness)**(k-1))*2**(-k)
+    t = np.linspace(0,2*np.pi,numpoints)
+    num = (a*(np.cos(t)-1)+1j*a*np.sin(t))**k
+    den = (a*(np.cos(t)-thickness)+1j*a*np.sin(t))**(k-1)
+    z = (num/den)+semichord
+    x = [w.real for w in z]
+    y = [w.imag for w in z]
+    return Body(np.array([x,y]).T)
 
 def naca_airfoil(code, num_points, zero_thick_te=False, uniform=False):
     """Return a NACA 4-digit series airfoil"""
