@@ -29,6 +29,10 @@ To generate a nice html report, use::
 
 and then open the files generated in the directory ``htmlcov/``.
 
+Coverage may be installed by executing::
+
+  $ pip install coverage
+
 Documentation
 =============
 

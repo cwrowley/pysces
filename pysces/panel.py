@@ -2,7 +2,6 @@ from __future__ import division
 
 import numpy as np
 import sys
-import matplotlib.pyplot as plt
 from .vortex import Vortices
 
 __all__ = ['BoundVortices', 'BoundSourceDoublets']
@@ -49,15 +48,6 @@ class BoundVortices(object):
             self._wake_dir = -dq[0] / np.linalg.norm(dq[0])
         self._vortices = Vortices(xvort)
         self._influence_matrix = None
-
-        # Uncomment the following lines to see the vortex and collocation
-        # points.
-        #plt.plot(q[:,0],q[:,1],'-k')
-        #plt.plot(xvort[:,0],xvort[:,1],'ro')
-        #plt.plot(self._xcoll[:,0],self._xcoll[:,1],'bs')
-        #plt.axis('equal')
-        #plt.legend(['body','vortices','collocation pts'])
-        #plt.show()
 
     def update_positions(self):
         # If non-rigid bodies are used, update panel positions here.
