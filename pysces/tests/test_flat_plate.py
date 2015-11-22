@@ -14,7 +14,8 @@ class TestFlatPlate(unittest.TestCase):
         aoa_deg = [2,4,6]
         for aoa in aoa_deg:
             err_norm = self.flat_plate(aoa)
-            self.assertLess(err_norm, self._threshold)
+            success = True if (err_norm< self._threshold) else False
+            self.assertTrue(success)
 
     def flat_plate(self, aoa_deg = 2.0):
         num_points = 20
