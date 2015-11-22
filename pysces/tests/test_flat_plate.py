@@ -1,7 +1,6 @@
 import numpy as np
 import unittest
 from pysces import *
-import matplotlib.pyplot as plt
 
 class TestFlatPlate(unittest.TestCase):
     """ Test unsteady flat plate problem for small angles of attack by 
