@@ -3,10 +3,11 @@ import unittest
 from pysces import *
 
 class TestFlatPlate(unittest.TestCase):
-    """ Test unsteady flat plate problem for small angles of attack by 
-    compareing with exact results from thin airfoil theory.  The L2 norm of the
-    computed solution relative to the exact solution must be below a given
-    threshold."""
+    """Test unsteady flat plate problem for small angles of attack.
+    
+    The test compares with exact results from thin airfoil theory.
+    The L2 norm of the computed solution relative to the exact solution 
+    must be below a given threshold."""
 
     _threshold = 1.e-2
 

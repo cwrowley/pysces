@@ -69,6 +69,9 @@ class Vortices(object):
     def induced_velocity_single(self, x, xvort, gam):
         r"""Compute velocity induced at points x by a single vortex
 
+        This method returns a vector of velocities at the points x induced
+        by a single vortex of strength gam located at xvort.
+
         Parameters
         ----------
         x : 2d array
@@ -78,9 +81,6 @@ class Vortices(object):
             Location of vortex (shape should be (2,))
         gam : float
             Strength of vortex
-
-        This method returns a vector of velocities at the points x induced
-        by a single vortex of strength gam located at xvort.
 
         Notes
         -----

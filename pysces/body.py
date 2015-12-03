@@ -49,25 +49,36 @@ def cylinder(radius, num_points):
     return Body(points)
 
 def flat_plate(num_points):
-    """
-    Return a flat plate with the given number of points.  In body coordinates
-    the plate runs from (0,0) to (1,0)."""
+    """Return a flat plate Body with the given number of points.
+    
+    In body coordinates the plate runs from (0,0) to (1,0)."""
     x = np.linspace(1, 0, num_points) # from 1 to 0 so trailing edge at index 0
     y = np.zeros_like(x)
     return Body(np.array([x, y]).T)
 
 def joukowski_foil(xcenter=-.1, ycenter=.1, a=1, numpoints=32):
-    """
-    Return a Joukowski foil centered with the trailing edge at (2a,0), and 
-    with a total of numpoints along the boundary.
+    """Return a Joukowski foil Body.
+    
+    The foil has its trailing edge at (2a,0).  The foil has a total of
+    numpoints along the boundary.  Refer to chapter 4 of [1]_ for details.
 
-    (xcenter,ycenter) and a are the center and radius of the preimage circle.
-    Note that xcenter should be negative and small.  Its magnitude determines
-    the bluffness of the foil.  Meanwhile, ycenter should be small.  It
-    determines the magnitude of the camber; positive gives upward
-    camber, and negative gives downward camber.
+    Parameters
+    ----------
+    xcenter, ycenter : float
+        (xcenter,ycenter) is the center of the Joukowski preimage circle.
+        xcenter should be negative and small; its magnitude determines
+        the bluffness of the foil.  ycenter should be small; it
+        determines the magnitude of the camber (positive gives upward
+        camber, and negative gives downward camber).
 
-    (See sections 4.6 - 4.9 of Acheson.)"""
+    a : float
+        radius of the Joukowski preimage circle
+
+    numpoints : int
+        number of points along the boundary
+
+    .. [1] Acheson, D. J., "Elementary Fluid Dynamics", Oxford, 1990."""
+
     t = np.linspace(0,2*np.pi,numpoints)
     r = np.sqrt((a-xcenter)**2+ycenter**2)
     chi = xcenter + r*np.cos(t)
@@ -78,14 +89,29 @@ def joukowski_foil(xcenter=-.1, ycenter=.1, a=1, numpoints=32):
     return Body(np.array([x,y]).T)
 
 def karman_trefftz_foil(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32):
-    """
-    Return a Karman-Trefftz foil.  This is a modified version of the Joukowski
-    foil but with a nonzero interior angle, rather than a cusp, at the trailing
-    edge.  The parameters xcenter, ycenter, a, and numpoints are the same as 
-    for joukowski_foil(), and angle_deg is the interior angle, in degrees, 
-    at the trailing edge.
+    """Return a Karman-Trefftz foil Body.
     
-    See https://en.wikipedia.org/wiki/Joukowsky_transform"""
+    The Karman-Trefftz foil is a modified version of the Joukowski
+    foil but with a nonzero interior angle --- rather than a cusp ---  at the 
+    trailing edge.  Refer to [1]_ for details.
+    
+    Parameters
+    ----------
+    xcenter, ycenter, a : float.
+        The same as in joukowski_foil().
+
+    angle_deg : float
+        The interior angle, in degrees, at the trailing edge.
+
+    numpoints : int
+        Number of points along the boundary
+
+    See Also
+    --------
+    joukowski_foil()
+
+    .. [1] https://en.wikipedia.org/wiki/Joukowsky_transform"""
+
     angle_rad = angle_deg*np.pi/180
     n = 2-angle_rad/np.pi
     t = np.linspace(0,2*np.pi,numpoints)
@@ -100,17 +126,27 @@ def karman_trefftz_foil(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32
 
 def van_de_vooren_foil(semichord=1.0, thickness=0.15, angle_deg=5,
 numpoints=32):
-    """
-    Return a van de Vooren foil.
+    """Return a van de Vooren foil Body.
 
-    semichord = half the chord c, so c=2l
-    thickness = vertical thickness as a fraction (0 < thickness < 1) of 
-                the semichord
-    angle_deg = interior angle, in degrees, at the trailing edge
-    numpoints = number of points along the boundary
+    Refer to section 6.6 of [1]_
 
-    See section 6.6 of Katz and Plotkin, 2nd Ed.
-    """
+    Parameters
+    ----------
+    semichord : float
+        half the chord c, so c=2*semichord
+
+    thickness : float
+        vertical thickness as a fraction (0 < thickness < 1) of the semichord
+
+    angle_deg : float
+        interior angle, in degrees, at the trailing edge
+
+    numpoints : int
+        number of points along the boundary
+
+    .. [1] Katz, Joseph and Plotkin, Allen, "Low-Speed Aerodynamics", 2nd Ed.,
+    Cambridge University Press, 2001."""
+
     k = 2-(angle_deg*np.pi/180)
     a = 2*semichord*((1+thickness)**(k-1))*2**(-k)
     t = np.linspace(0,2*np.pi,numpoints)
