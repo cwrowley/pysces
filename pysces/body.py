@@ -3,7 +3,7 @@ from .motion import RigidMotion
 
 __all__ = ['Body', 'TransformedBody', 'Pitching', 'Heaving',
            'cylinder', 'flat_plate', 'naca_airfoil', 'joukowski_foil',
-           'van_de_vooren_foil', 'karman_trefftz']
+           'van_de_vooren_foil', 'karman_trefftz_foil']
 
 class Body(object):
     """Base class for representing bodies
@@ -77,7 +77,7 @@ def joukowski_foil(xcenter=-.1, ycenter=.1, a=1, numpoints=32):
     y = eta*(1-a**2/mag2)
     return Body(np.array([x,y]).T)
 
-def karman_trefftz(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32):
+def karman_trefftz_foil(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32):
     """
     Return a Karman-Trefftz foil.  This is a modified version of the Joukowski
     foil but with a nonzero interior angle, rather than a cusp, at the trailing
