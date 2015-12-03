@@ -77,7 +77,10 @@ def joukowski_foil(xcenter=-.1, ycenter=.1, a=1, numpoints=32):
     numpoints : int
         number of points along the boundary
 
-    .. [1] Acheson, D. J., "Elementary Fluid Dynamics", Oxford, 1990."""
+    References
+    ----------
+    .. [1] Acheson, D. J., "Elementary Fluid Dynamics", Oxford, 1990.
+    """
 
     t = np.linspace(0,2*np.pi,numpoints)
     r = np.sqrt((a-xcenter)**2+ycenter**2)
@@ -110,7 +113,10 @@ def karman_trefftz_foil(xcenter=-.1, ycenter=0, a=.1, angle_deg=10, numpoints=32
     --------
     joukowski_foil()
 
-    .. [1] https://en.wikipedia.org/wiki/Joukowsky_transform"""
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Joukowsky_transform
+    """
 
     angle_rad = angle_deg*np.pi/180
     n = 2-angle_rad/np.pi
@@ -144,8 +150,11 @@ numpoints=32):
     numpoints : int
         number of points along the boundary
 
+    References
+    ----------
     .. [1] Katz, Joseph and Plotkin, Allen, "Low-Speed Aerodynamics", 2nd Ed.,
-    Cambridge University Press, 2001."""
+       Cambridge University Press, 2001.
+    """
 
     k = 2-(angle_deg*np.pi/180)
     a = 2*semichord*((1+thickness)**(k-1))*2**(-k)

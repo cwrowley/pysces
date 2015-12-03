@@ -19,7 +19,10 @@ Generating bodies
    Heaving
    cylinder
    flat_plate
+   joukowski_foil
+   karman_trefftz_foil
    naca_airfoil
+   van_de_vooren_foil
 
 Panel methods
 =============
